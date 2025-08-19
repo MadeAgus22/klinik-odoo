@@ -1,34 +1,35 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "klinik",
+    'name': "Klinik Sederhana",
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    'summary': """
+        Modul untuk manajemen klinik sederhana""",
 
     'description': """
-Long description of module's purpose
+        Modul ini mencakup pendaftaran pasien untuk rawat jalan, rawat darurat, dan rawat inap.
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    'author': "Anda (MadeAgus)",
+    'website': "https://absensi-lovat-seven.vercel.app/",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Services/Klinik',
+    'version': '18.0.1.0.0',
+    'license': 'LGPL-3',
 
-    # any module necessary for this one to work correctly
-    'depends': ['base'],
+    "depends": ["product", "stock", "sale"],
 
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+    # selalu dimuat
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "views/menu.xml",
+        "views/product_views.xml",
     ],
-    # only loaded in demonstration mode
+
+    # hanya dimuat dalam mode demo
     'demo': [
         'demo/demo.xml',
     ],
+    'application': True,
+    'installable': True,
 }
-

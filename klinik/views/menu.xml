@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_klinik_root" name="Klinik Gigi" sequence="10"/>
+    <menuitem id="menu_klinik_master" name="Master Data" parent="menu_klinik_root" sequence="10"/>
+
+    <!-- Tindakan -->
+    <record id="action_klinik_tindakan" model="ir.actions.act_window">
+        <field name="name">Tindakan</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('dental_product_type','=','treatment')]</field>
+        <field name="context">
+            {
+                'default_dental_product_type':'treatment',
+                'search_default_klinik_tindakan': 1
+            }
+        </field>
+    </record>
+    <menuitem id="menu_klinik_tindakan" name="Tindakan"
+              parent="menu_klinik_master" action="action_klinik_tindakan" sequence="20"/>
+
+    <!-- Obat -->
+    <record id="action_klinik_obat" model="ir.actions.act_window">
+        <field name="name">Obat</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('dental_product_type','=','medicine')]</field>
+        <field name="context">
+            {
+                'default_dental_product_type':'medicine',
+                'search_default_klinik_obat': 1
+            }
+        </field>
+    </record>
+    <menuitem id="menu_klinik_obat" name="Obat"
+              parent="menu_klinik_master" action="action_klinik_obat" sequence="30"/>
+
+    <!-- Alat Kesehatan -->
+    <record id="action_klinik_alkes" model="ir.actions.act_window">
+        <field name="name">Alat Kesehatan</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('dental_product_type','=','device')]</field>
+        <field name="context">
+            {
+                'default_dental_product_type':'device',
+                'search_default_klinik_alkes': 1
+            }
+        </field>
+    </record>
+    <menuitem id="menu_klinik_alkes" name="Alat Kesehatan"
+              parent="menu_klinik_master" action="action_klinik_alkes" sequence="40"/>
+</odoo>

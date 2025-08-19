@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# from odoo import models, fields, api
+from odoo import models, fields, api
 
 
-# class klinik(models.Model):
-#     _name = 'klinik.klinik'
-#     _description = 'klinik.klinik'
+# class clinic_odoo(models.Model):
+#     _name = 'clinic_odoo.clinic_odoo'
+#     _description = 'clinic_odoo.clinic_odoo'
 
 #     name = fields.Char()
 #     value = fields.Integer()
