@@ -1,0 +1,116 @@
+<odoo>
+  <data>
+
+    <record id="klinik_pasien_view_tree" model="ir.ui.view">
+        <field name="name">klinik.pasien.tree</field>
+        <field name="model">klinik.pasien</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="no_rm"/>
+                <field name="name"/>
+                <field name="jenis_kelamin"/>
+                <field name="tanggal_lahir"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="klinik_pasien_view_form" model="ir.ui.view">
+        <field name="name">klinik.pasien.form</field>
+        <field name="model">klinik.pasien</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="no_rm"/>
+                        <field name="tanggal_lahir"/>
+                        <field name="jenis_kelamin"/>
+                    </group>
+                    <field name="alamat"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="klinik_registrasi_view_tree" model="ir.ui.view">
+        <field name="name">klinik.registrasi.tree</field>
+        <field name="model">klinik.registrasi</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="pasien_id"/>
+                <field name="no_rm"/>
+                <field name="tanggal_registrasi"/>
+                <field name="jenis_registrasi"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="klinik_registrasi_view_form" model="ir.ui.view">
+        <field name="name">klinik.registrasi.form</field>
+        <field name="model">klinik.registrasi</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="pasien_id"/>
+                        <field name="tanggal_registrasi"/>
+                        <field name="jenis_registrasi"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="klinik_pasien_action" model="ir.actions.act_window">
+        <field name="name">Data Pasien</field>
+        <field name="res_model">klinik.pasien</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="klinik_registrasi_rawat_jalan_action" model="ir.actions.act_window">
+        <field name="name">Registrasi Rawat Jalan</field>
+        <field name="res_model">klinik.registrasi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('jenis_registrasi', '=', 'rawat_jalan')]</field>
+        <field name="context">{'default_jenis_registrasi': 'rawat_jalan'}</field>
+    </record>
+
+    <record id="klinik_registrasi_rawat_darurat_action" model="ir.actions.act_window">
+        <field name="name">Registrasi Rawat Darurat</field>
+        <field name="res_model">klinik.registrasi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('jenis_registrasi', '=', 'rawat_darurat')]</field>
+        <field name="context">{'default_jenis_registrasi': 'rawat_darurat'}</field>
+    </record>
+
+    <record id="klinik_registrasi_rawat_inap_action" model="ir.actions.act_window">
+        <field name="name">Registrasi Rawat Inap</field>
+        <field name="res_model">klinik.registrasi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('jenis_registrasi', '=', 'rawat_inap')]</field>
+        <field name="context">{'default_jenis_registrasi': 'rawat_inap'}</field>
+    </record>
+
+    <record id="klinik_reservasi_inap_action" model="ir.actions.act_window">
+        <field name="name">Reservasi Rawat Inap</field>
+        <field name="res_model">klinik.registrasi</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('jenis_registrasi', '=', 'reservasi_inap')]</field>
+        <field name="context">{'default_jenis_registrasi': 'reservasi_inap'}</field>
+    </record>
+
+    <menuitem id="klinik_menu_root" name="Klinik"/>
+
+    <menuitem id="klinik_registrasi_menu" name="Registrasi" parent="klinik_menu_root" sequence="10"/>
+        <menuitem id="klinik_rawat_jalan_menu" name="Rawat Jalan" parent="klinik_registrasi_menu" action="klinik_registrasi_rawat_jalan_action" sequence="1"/>
+        <menuitem id="klinik_rawat_darurat_menu" name="Rawat Darurat" parent="klinik_registrasi_menu" action="klinik_registrasi_rawat_darurat_action" sequence="2"/>
+        <menuitem id="klinik_rawat_inap_menu" name="Rawat Inap" parent="klinik_registrasi_menu" action="klinik_registrasi_rawat_inap_action" sequence="3"/>
+        <menuitem id="klinik_reservasi_inap_menu" name="Reservasi Rawat Inap" parent="klinik_registrasi_menu" action="klinik_reservasi_inap_action" sequence="4"/>
+
+    <menuitem id="klinik_master_data_menu" name="Master Data" parent="klinik_menu_root" sequence="100"/>
+        <menuitem id="klinik_pasien_menu" name="Data Pasien" parent="klinik_master_data_menu" action="klinik_pasien_action"/>
+
+  </data>
+</odoo>

@@ -25,6 +25,7 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'views/mst_service_types_views.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

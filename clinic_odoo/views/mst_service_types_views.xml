@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="mst_service_types_view_list" model="ir.ui.view">
+            <field name="name">mst.service.types.list</field>
+            <field name="model">mst.service.types</field>
+            <field name="arch" type="xml">
+                <list string="Daftar Jenis Pelayanan">
+                    <field name="nomer"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="mst_service_types_view_form" model="ir.ui.view">
+            <field name="name">mst.service.types.form</field>
+            <field name="model">mst.service.types</field>
+            <field name="arch" type="xml">
+                <form string="Formulir Jenis Pelayanan">
+                    <sheet>
+                        <group>
+                            <field name="nomer"/>
+                            <field name="name"/>
+                            <field name="description"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="mst_service_types_action" model="ir.actions.act_window">
+            <field name="name">Master Jenis Pelayanan</field>
+            <field name="res_model">mst.service.types</field>
+            <field name="view_mode">list,form</field> 
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Belum ada data Jenis Pelayanan. Buat yang baru!
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_dashboard_clinic" name="Clinic"/>
+        <menuitem id="menu_bar_clinic" name="Data Master" parent="menu_dashboard_clinic"/>
+        <menuitem id="menu_item_data_master" name="Master Jenis Pelayanan" parent="menu_bar_clinic" action="mst_service_types_action"/>
+
+    </data>
+</odoo>
