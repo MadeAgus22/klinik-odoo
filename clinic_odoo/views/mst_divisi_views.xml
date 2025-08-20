@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- List View -->
+    <record id="mst_divisi_view_list" model="ir.ui.view">
+      <field name="name">mst.divisi.list</field>
+      <field name="model">mst.divisi</field>
+      <field name="arch" type="xml">
+        <list string="Daftar Divisi">
+          <field name="kode"/>
+          <field name="name"/>
+          <field name="poli_id"/>
+          <field name="service_type_id"/>
+          <field name="description"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="mst_divisi_view_form" model="ir.ui.view">
+      <field name="name">mst.divisi.form</field>
+      <field name="model">mst.divisi</field>
+      <field name="arch" type="xml">
+        <form string="Master Divisi">
+          <sheet>
+            <group>
+              <field name="kode"/>
+              <field name="name"/>
+              <field name="poli_id" options="{'no_create_edit': False}"/>
+              <field name="service_type_id" readonly="1"/>
+            </group>
+            <group>
+              <field name="description"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- Action -->
+    <record id="mst_divisi_action" model="ir.actions.act_window">
+      <field name="name">Master Divisi</field>
+      <field name="res_model">mst.divisi</field>
+      <field name="view_mode">list,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Belum ada data Divisi. Buat yang baru!
+        </p>
+      </field>
+    </record>
+
+    <!-- Menu (di bawah Data Master, setelah Master Poli) -->
+    <menuitem id="menu_item_master_divisi"
+              name="Master Divisi"
+              parent="clinic_odoo.menu_bar_clinic"
+              action="mst_divisi_action"
+              sequence="30"/>
+  </data>
+</odoo>
