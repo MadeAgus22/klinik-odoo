@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mst_poli_view_list" model="ir.ui.view">
+            <field name="name">mst.poli.list</field>
+            <field name="model">mst.poli</field>
+            <field name="arch" type="xml">
+                <list string="Daftar Poli">
+                    <field name="kode"/>
+                    <field name="name"/>
+                    <field name="service_type_id"/>
+                    <field name="description"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="mst_poli_view_form" model="ir.ui.view">
+            <field name="name">mst.poli.form</field>
+            <field name="model">mst.poli</field>
+            <field name="arch" type="xml">
+                <form string="Formulir Poli">
+                    <sheet>
+                        <group>
+                            <field name="kode"/>
+                            <field name="name"/>
+                            <field name="service_type_id"/>
+                            <field name="description"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="mst_poli_action" model="ir.actions.act_window">
+            <field name="name">Master Poli</field>
+            <field name="res_model">mst.poli</field>
+            <field name="view_mode">list,form</field>
+        </record>
+        <menuitem id="menu_item_master_poli" name="Master Poli" parent="clinic_odoo.menu_bar_clinic" action="mst_poli_action" sequence="20"/>
+    </data>
+</odoo>
