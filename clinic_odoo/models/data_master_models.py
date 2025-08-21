@@ -60,3 +60,64 @@ class mst_kelas_tarif(models.Model):
     def action_toggle_active(self):
         for rec in self:
             rec.active = not rec.active
+
+# --- MASTER PRODUK: TINDAKAN ---
+class mst_produk_tindakan(models.Model):
+    _name = 'mst.produk.tindakan'
+    _description = 'Master Produk - Tindakan'
+    _rec_name = 'name'
+
+    kode = fields.Char(string='Kode', required=True)
+    name = fields.Char(string='Nama Tindakan', required=True)
+    description = fields.Text(string='Catatan')
+    active = fields.Boolean(string='Status', default=True)
+
+    _sql_constraints = [
+        ('kode_tindakan_unique', 'unique(kode)', 'Kode Tindakan harus unik!'),
+    ]
+
+    def action_toggle_active(self):
+        for rec in self:
+            rec.active = not rec.active
+
+
+# --- MASTER PRODUK: OBAT ---
+class mst_produk_obat(models.Model):
+    _name = 'mst.produk.obat'
+    _description = 'Master Produk - Obat'
+    _rec_name = 'name'
+
+    kode = fields.Char(string='Kode', required=True)
+    name = fields.Char(string='Nama Obat', required=True)
+    description = fields.Text(string='Catatan')
+    active = fields.Boolean(string='Status', default=True)
+
+    _sql_constraints = [
+        ('kode_obat_unique', 'unique(kode)', 'Kode Obat harus unik!'),
+    ]
+
+    def action_toggle_active(self):
+        for rec in self:
+            rec.active = not rec.active
+
+
+# --- MASTER PRODUK: ALAT KESEHATAN ---
+class mst_produk_alatkesehatan(models.Model):
+    _name = 'mst.produk.alatkesehatan'
+    _description = 'Master Produk - Alat Kesehatan'
+    _rec_name = 'name'
+
+    kode = fields.Char(string='Kode', required=True)
+    name = fields.Char(string='Nama Alat', required=True)
+    description = fields.Text(string='Catatan')
+    active = fields.Boolean(string='Status', default=True)
+
+    _sql_constraints = [
+        ('kode_alat_unique', 'unique(kode)', 'Kode Alat harus unik!'),
+    ]
+
+    def action_toggle_active(self):
+        for rec in self:
+            rec.active = not rec.active
+
+            

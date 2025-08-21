@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- ===================== MENU MASTER PRODUK (Parent) ===================== -->
+    <menuitem id="menu_master_produk"
+              name="Master Produk"
+              parent="clinic_odoo.menu_bar_clinic"
+              sequence="50"/>
+
+    <!-- ===================== TINDAKAN ===================== -->
+    <!-- LIST -->
+    <record id="mst_produk_tindakan_view_list" model="ir.ui.view">
+      <field name="name">mst.produk.tindakan.list</field>
+      <field name="model">mst.produk.tindakan</field>
+      <field name="arch" type="xml">
+        <list string="Daftar Tindakan" create="true" delete="true" edit="true">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Tindakan"/>
+          <field name="active" string="Status"/>
+          <!-- Aksi toggle (Odoo 18: tanpa attrs) -->
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Nonaktifkan" invisible="not active"/>
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Aktifkan" invisible="active"/>
+          <field name="description" string="Catatan"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="mst_produk_tindakan_view_form" model="ir.ui.view">
+      <field name="name">mst.produk.tindakan.form</field>
+      <field name="model">mst.produk.tindakan</field>
+      <field name="arch" type="xml">
+        <form string="Master Tindakan">
+          <sheet>
+            <group>
+              <field name="kode" string="Kode"/>
+              <field name="name" string="Nama Tindakan"/>
+              <field name="active" string="Status"/>
+            </group>
+            <group>
+              <field name="description" string="Catatan" placeholder="Catatan..."/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="mst_produk_tindakan_view_search" model="ir.ui.view">
+      <field name="name">mst.produk.tindakan.search</field>
+      <field name="model">mst.produk.tindakan</field>
+      <field name="arch" type="xml">
+        <search string="Cari Tindakan">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Tindakan"/>
+          <filter string="Aktif" name="active_true" domain="[('active','=',True)]"/>
+          <filter string="Arsip" name="active_false" domain="[('active','=',False)]"/>
+        </search>
+      </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="mst_produk_tindakan_action" model="ir.actions.act_window">
+      <field name="name">Master Tindakan</field>
+      <field name="res_model">mst.produk.tindakan</field>
+      <field name="view_mode">list,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">Belum ada data Tindakan. Buat yang baru!</p>
+      </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_master_produk_tindakan"
+              name="Master Tindakan"
+              parent="menu_master_produk"
+              action="mst_produk_tindakan_action"
+              sequence="10"/>
+
+    <!-- ===================== OBAT ===================== -->
+    <!-- LIST -->
+    <record id="mst_produk_obat_view_list" model="ir.ui.view">
+      <field name="name">mst.produk.obat.list</field>
+      <field name="model">mst.produk.obat</field>
+      <field name="arch" type="xml">
+        <list string="Daftar Obat" create="true" delete="true" edit="true">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Obat"/>
+          <field name="active" string="Status"/>
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Nonaktifkan" invisible="not active"/>
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Aktifkan" invisible="active"/>
+          <field name="description" string="Catatan"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="mst_produk_obat_view_form" model="ir.ui.view">
+      <field name="name">mst.produk.obat.form</field>
+      <field name="model">mst.produk.obat</field>
+      <field name="arch" type="xml">
+        <form string="Master Obat">
+          <sheet>
+            <group>
+              <field name="kode" string="Kode"/>
+              <field name="name" string="Nama Obat"/>
+              <field name="active" string="Status"/>
+            </group>
+            <group>
+              <field name="description" string="Catatan" placeholder="Catatan..."/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="mst_produk_obat_view_search" model="ir.ui.view">
+      <field name="name">mst.produk.obat.search</field>
+      <field name="model">mst.produk.obat</field>
+      <field name="arch" type="xml">
+        <search string="Cari Obat">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Obat"/>
+          <filter string="Aktif" name="active_true" domain="[('active','=',True)]"/>
+          <filter string="Arsip" name="active_false" domain="[('active','=',False)]"/>
+        </search>
+      </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="mst_produk_obat_action" model="ir.actions.act_window">
+      <field name="name">Master Obat</field>
+      <field name="res_model">mst.produk.obat</field>
+      <field name="view_mode">list,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">Belum ada data Obat. Buat yang baru!</p>
+      </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_master_produk_obat"
+              name="Master Obat"
+              parent="menu_master_produk"
+              action="mst_produk_obat_action"
+              sequence="20"/>
+
+    <!-- ===================== ALAT KESEHATAN ===================== -->
+    <!-- LIST -->
+    <record id="mst_produk_alatkesehatan_view_list" model="ir.ui.view">
+      <field name="name">mst.produk.alatkesehatan.list</field>
+      <field name="model">mst.produk.alatkesehatan</field>
+      <field name="arch" type="xml">
+        <list string="Daftar Alat Kesehatan" create="true" delete="true" edit="true">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Alat"/>
+          <field name="active" string="Status"/>
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Nonaktifkan" invisible="not active"/>
+          <button name="action_toggle_active" type="object" class="oe_link"
+                  string="Aktifkan" invisible="active"/>
+          <field name="description" string="Catatan"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="mst_produk_alatkesehatan_view_form" model="ir.ui.view">
+      <field name="name">mst.produk.alatkesehatan.form</field>
+      <field name="model">mst.produk.alatkesehatan</field>
+      <field name="arch" type="xml">
+        <form string="Master Alat Kesehatan">
+          <sheet>
+            <group>
+              <field name="kode" string="Kode"/>
+              <field name="name" string="Nama Alat"/>
+              <field name="active" string="Status"/>
+            </group>
+            <group>
+              <field name="description" string="Catatan" placeholder="Catatan..."/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="mst_produk_alatkesehatan_view_search" model="ir.ui.view">
+      <field name="name">mst.produk.alatkesehatan.search</field>
+      <field name="model">mst.produk.alatkesehatan</field>
+      <field name="arch" type="xml">
+        <search string="Cari Alat Kesehatan">
+          <field name="kode" string="Kode"/>
+          <field name="name" string="Nama Alat"/>
+          <filter string="Aktif" name="active_true" domain="[('active','=',True)]"/>
+          <filter string="Arsip" name="active_false" domain="[('active','=',False)]"/>
+        </search>
+      </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="mst_produk_alatkesehatan_action" model="ir.actions.act_window">
+      <field name="name">Master Alat Kesehatan</field>
+      <field name="res_model">mst.produk.alatkesehatan</field>
+      <field name="view_mode">list,form</field>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">Belum ada data Alat Kesehatan. Buat yang baru!</p>
+      </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="menu_master_produk_alatkesehatan"
+              name="Master Alat Kesehatan"
+              parent="menu_master_produk"
+              action="mst_produk_alatkesehatan_action"
+              sequence="30"/>
+
+  </data>
+</odoo>
