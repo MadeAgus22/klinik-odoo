@@ -42,3 +42,21 @@ class mst_divisi(models.Model):
     _sql_constraints = [
         ('mst_divisi_kode_unique', 'unique(kode)', 'Kode Divisi harus unik!'),
     ]
+
+class mst_kelas_tarif(models.Model):
+    _name = 'mst.kelas.tarif'
+    _description = 'Master Grup Kelas Tarif'
+    _rec_name = 'name'
+
+    kode = fields.Char(string='Kode Kelas', required=True)
+    name = fields.Char(string='Nama Kelas', required=True)
+    description = fields.Text(string='Catatan')
+    active = fields.Boolean(string='Status', default=True)
+
+    _sql_constraints = [
+        ('kelas_kode_unique', 'unique(kode)', 'Kode Kelas harus unik!'),
+    ]
+
+    def action_toggle_active(self):
+        for rec in self:
+            rec.active = not rec.active
