@@ -119,5 +119,5 @@ class mst_produk_alatkesehatan(models.Model):
     def action_toggle_active(self):
         for rec in self:
             rec.active = not rec.active
-
             
+                        
