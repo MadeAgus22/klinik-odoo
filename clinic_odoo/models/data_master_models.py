@@ -72,6 +72,8 @@ class mst_produk_tindakan(models.Model):
     description = fields.Text(string='Catatan')
     active = fields.Boolean(string='Status', default=True)
 
+    tarif_ids = fields.One2many('mst.tarif.tindakan', 'produk_id', string='Tarif')
+    
     _sql_constraints = [
         ('kode_tindakan_unique', 'unique(kode)', 'Kode Tindakan harus unik!'),
     ]
@@ -119,5 +121,41 @@ class mst_produk_alatkesehatan(models.Model):
     def action_toggle_active(self):
         for rec in self:
             rec.active = not rec.active
-            
-                        
+
+class mst_tarif_tindakan(models.Model):
+    _name = 'mst.tarif.tindakan'
+    _description = 'Master Tarif Tindakan'
+    _rec_name = 'kode'
+
+    kode = fields.Char(string='Kode Tarif', required=True)
+    produk_id = fields.Many2one('mst.produk.tindakan', string='Nama Produk', required=True, ondelete='restrict')
+    kelas_id  = fields.Many2one('mst.kelas.tarif', string='Kelas', required=True, ondelete='restrict')
+
+    currency_id = fields.Many2one('res.currency', string='Mata Uang',
+                                  default=lambda self: self.env.company.currency_id.id, required=True)
+
+    jasa_klinik   = fields.Monetary(string='Jasa Klinik', default=0.0, currency_field='currency_id')
+    jasa_admin    = fields.Monetary(string='Jasa Admin', default=0.0, currency_field='currency_id')
+    jasa_operator = fields.Monetary(string='Jasa Operator', default=0.0, currency_field='currency_id')
+    jasa_lainnya  = fields.Monetary(string='Jasa Lainnya', default=0.0, currency_field='currency_id')
+
+    total_tarif = fields.Monetary(string='Total Tarif', compute='_compute_total_tarif',
+                                  store=True, currency_field='currency_id')
+
+    date_start = fields.Date(string='Tanggal Awal')
+    date_end   = fields.Date(string='Tanggal Akhir')
+    active     = fields.Boolean(string='Aktif', default=True)
+    description = fields.Text(string='Catatan')
+
+    _sql_constraints = [
+        ('kode_tarif_tindakan_unique', 'unique(kode)', 'Kode Tarif harus unik!'),
+    ]
+
+    @api.depends('jasa_klinik', 'jasa_admin', 'jasa_operator', 'jasa_lainnya')
+    def _compute_total_tarif(self):
+        for rec in self:
+            rec.total_tarif = (rec.jasa_klinik or 0.0) + (rec.jasa_admin or 0.0) + (rec.jasa_operator or 0.0) + (rec.jasa_lainnya or 0.0)
+
+    def action_toggle_active(self):
+        for rec in self:
+            rec.active = not rec.active
