@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- Inline LIST untuk O2M mst.tarif.obat -->
+    <record id="mst_tarif_obat_view_inline_list" model="ir.ui.view">
+      <field name="name">mst.tarif.obat.inline.list</field>
+      <field name="model">mst.tarif.obat</field>
+      <field name="arch" type="xml">
+        <list editable="bottom" string="Daftar Tarif Obat">
+          <field name="kode"        string="Kode Tarif"/>
+          <field name="kelas_id"    string="Kelas"/>
+          <field name="jasa_klinik"/>
+          <field name="jasa_admin"/>
+          <field name="jasa_operator"/>
+          <field name="jasa_lainnya"/>
+          <field name="total_tarif" readonly="1"/>
+          <field name="date_start"  string="Tanggal Awal"/>
+          <field name="date_end"    string="Tanggal Akhir"/>
+          <field name="active"      string="Aktif"/>
+          <field name="description" string="Catatan"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- (Opsional) Inline FORM untuk popover baris -->
+    <record id="mst_tarif_obat_view_inline_form" model="ir.ui.view">
+      <field name="name">mst.tarif.obat.inline.form</field>
+      <field name="model">mst.tarif.obat</field>
+      <field name="arch" type="xml">
+        <form string="Tarif Obat">
+          <group>
+            <field name="kode"/>
+            <field name="kelas_id"/>
+            <field name="active"/>
+          </group>
+          <group>
+            <field name="jasa_klinik"/>
+            <field name="jasa_admin"/>
+            <field name="jasa_operator"/>
+            <field name="jasa_lainnya"/>
+            <field name="total_tarif" readonly="1"/>
+          </group>
+          <group>
+            <field name="date_start"/>
+            <field name="date_end"/>
+          </group>
+          <group>
+            <field name="description"/>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <!-- Inherit FORM Master Obat: tambah tab "Tarif Obat" -->
+    <record id="mst_produk_obat_form_inherit_tarif" model="ir.ui.view">
+      <field name="name">mst.produk.obat.form.inherit.tarif</field>
+      <field name="model">mst.produk.obat</field>
+      <!-- Ganti ref ini bila External ID form Obat berbeda -->
+      <field name="inherit_id" ref="clinic_odoo.mst_produk_obat_view_form"/>
+      <field name="arch" type="xml">
+        <!-- Jika form Obat punya <notebook>, lebih rapi sisipkan ke sana.
+             Di sini kita sisipkan ke dalam <sheet> agar universal. -->
+        <xpath expr="//sheet" position="inside">
+          <notebook>
+            <page string="Tarif Obat">
+              <field name="tarif_ids"
+                     mode="list,form"
+                     context="{
+                       'list_view_ref': 'clinic_odoo.mst_tarif_obat_view_inline_list',
+                       'tree_view_ref': 'clinic_odoo.mst_tarif_obat_view_inline_list',
+                       'form_view_ref': 'clinic_odoo.mst_tarif_obat_view_inline_form'
+                     }"/>
+            </page>
+          </notebook>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Action: menu Master Tarif Obat membuka daftar Master Obat -->
+    <record id="mst_tarif_obat_product_action" model="ir.actions.act_window">
+      <field name="name">Master Tarif Obat</field>
+      <field name="res_model">mst.produk.obat</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Submenu di bawah Master Tarif (parent sudah dibuat saat Tarif Tindakan) -->
+    <menuitem id="menu_master_tarif_obat" name="Master Tarif Obat"
+              parent="menu_master_tarif"
+              action="mst_tarif_obat_product_action"
+              sequence="20"/>
+
+  </data>
+</odoo>

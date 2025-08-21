@@ -31,6 +31,7 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         'views/mst_kelas_tarif_views.xml',
         'views/mst_produk_views.xml',
         'views/mst_tarif_tindakan_embed_views.xml',
+        'views/mst_tarif_obat_embed_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
