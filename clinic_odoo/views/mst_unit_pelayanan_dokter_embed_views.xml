@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- Inline LIST untuk O2M -->
+    <record id="mst_unit_pelayanan_dokter_inline_list" model="ir.ui.view">
+      <field name="name">mst.unit.pelayanan.dokter.inline.list</field>
+      <field name="model">mst.unit.pelayanan.dokter</field>
+      <field name="arch" type="xml">
+        <list editable="bottom" string="Unit Pelayanan Dokter">
+          <field name="code"          string="Kode" readonly="1"/>
+          <field name="pelayanan_ref" string="Pelayanan"/>
+          <field name="active"        string="Aktif"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- Inline FORM (popover baris) -->
+    <record id="mst_unit_pelayanan_dokter_inline_form" model="ir.ui.view">
+      <field name="name">mst.unit.pelayanan.dokter.inline.form</field>
+      <field name="model">mst.unit.pelayanan.dokter</field>
+      <field name="arch" type="xml">
+        <form string="Unit Pelayanan Dokter">
+          <group>
+            <field name="code" readonly="1"/>
+            <field name="pelayanan_ref"/>
+            <field name="active"/>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <!-- Inherit FORM hr.employee: tambah tab -->
+    <record id="hr_employee_form_inherit_unit_pelayanan" model="ir.ui.view">
+      <field name="name">hr.employee.form.inherit.unit.pelayanan</field>
+      <field name="model">hr.employee</field>
+      <!-- Jika ID ini beda di sistemmu, ganti sesuai External ID form Employee -->
+      <field name="inherit_id" ref="hr.view_employee_form"/>
+      <field name="arch" type="xml">
+        <!-- sisipkan tab baru -->
+        <xpath expr="//sheet" position="inside">
+          <notebook>
+            <page string="Unit Pelayanan Dokter">
+              <field name="unit_pelayanan_ids"
+                     mode="list,form"
+                     context="{
+                       'list_view_ref': 'clinic_odoo.mst_unit_pelayanan_dokter_inline_list',
+                       'tree_view_ref': 'clinic_odoo.mst_unit_pelayanan_dokter_inline_list',
+                       'form_view_ref': 'clinic_odoo.mst_unit_pelayanan_dokter_inline_form'
+                     }"/>
+            </page>
+          </notebook>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Action: buka daftar pegawai (cari dokter by name di search bar) -->
+    <record id="action_master_unit_pelayanan_dokter" model="ir.actions.act_window">
+      <field name="name">Master Unit Pelayanan Dokter</field>
+      <field name="res_model">hr.employee</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu di Data Master -->
+    <menuitem id="menu_master_unit_pelayanan_dokter"
+              name="Master Unit Pelayanan Dokter"
+              parent="clinic_odoo.menu_bar_clinic"
+              action="action_master_unit_pelayanan_dokter"
+              sequence="70"/>
+  </data>
+</odoo>

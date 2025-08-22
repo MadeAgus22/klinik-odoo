@@ -9,6 +9,12 @@ class mst_service_types(models.Model):
     description = fields.Text(string='Keterangan')
     poli_ids = fields.One2many('mst.poli', 'service_type_id', string='Poli')
 
+    def name_get(self):
+        res = []
+        for rec in self:
+            res.append((rec.id, f"{rec.nomer or ''} - {rec.name or ''}".strip()))
+        return res
+
 class mst_poli(models.Model):
     _name = 'mst.poli'
     _description = 'Master Poli'
@@ -19,6 +25,11 @@ class mst_poli(models.Model):
     service_type_id = fields.Many2one('mst.service.types', string='Jenis Pelayanan', required=True, ondelete='cascade')
     divisi_ids = fields.One2many('mst.divisi', 'poli_id', string='Divisi')
 
+    def name_get(self):
+        res = []
+        for rec in self:
+            res.append((rec.id, f"{rec.kode or ''} - {rec.name or ''}".strip()))
+        return res
 class mst_divisi(models.Model):
     _name = 'mst.divisi'
     _description = 'Master Divisi'
@@ -42,6 +53,12 @@ class mst_divisi(models.Model):
     _sql_constraints = [
         ('mst_divisi_kode_unique', 'unique(kode)', 'Kode Divisi harus unik!'),
     ]
+
+    def name_get(self):
+        res = []
+        for rec in self:
+            res.append((rec.id, f"{rec.kode or ''} - {rec.name or ''}".strip()))
+        return res
 
 class mst_kelas_tarif(models.Model):
     _name = 'mst.kelas.tarif'
@@ -242,3 +259,41 @@ class mst_tarif_alatkesehatan(models.Model):
     def action_toggle_active(self):
         for rec in self:
             rec.active = not rec.active
+
+class HrEmployee(models.Model):
+    _inherit = 'hr.employee'
+    unit_pelayanan_ids = fields.One2many('mst.unit.pelayanan.dokter', 'employee_id', string='Unit Pelayanan Dokter')
+
+class mst_unit_pelayanan_dokter(models.Model):
+    _name = 'mst.unit.pelayanan.dokter'
+    _description = 'Mapping Unit Pelayanan Dokter'
+    _rec_name = 'code'
+
+    code = fields.Char(string='Kode', required=True, copy=False, readonly=True, default='New')
+    employee_id = fields.Many2one('hr.employee', string='Dokter', required=True, ondelete='cascade')
+
+    # Satu kolom yang bisa pilih dari 3 master: Jenis Pelayanan / Poli / Divisi
+    pelayanan_ref = fields.Reference(
+        selection=[
+            ('mst.service.types', 'Jenis Pelayanan'),
+            ('mst.poli', 'Poli'),
+            ('mst.divisi', 'Divisi'),
+        ],
+        string='Pelayanan',
+        required=True,
+    )
+
+    active = fields.Boolean(string='Aktif', default=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('code') or vals.get('code') == 'New':
+                vals['code'] = self.env['ir.sequence'].next_by_code('mst.unit.pelayanan.dokter') or '/'
+        return super().create(vals_list)
+
+    # (opsional) cegah baris tanpa pilihan pelayanan
+    def _check_any_pelayanan(self):
+        for rec in self:
+            if not rec.pelayanan_ref:
+                raise ValueError(_("Pilih satu Pelayanan (Jenis Pelayanan / Poli / Divisi)."))
