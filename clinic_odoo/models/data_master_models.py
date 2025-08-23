@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class mst_service_types(models.Model):
     _name = 'mst.service.types'
@@ -268,22 +269,58 @@ class mst_unit_pelayanan_dokter(models.Model):
     _name = 'mst.unit.pelayanan.dokter'
     _description = 'Mapping Unit Pelayanan Dokter'
     _rec_name = 'code'
+    _order = 'employee_id, service_type_id, poli_id, divisi_id, id'
 
     code = fields.Char(string='Kode', required=True, copy=False, readonly=True, default='New')
-    employee_id = fields.Many2one('hr.employee', string='Dokter', required=True, ondelete='cascade')
+    employee_id = fields.Many2one(
+        'hr.employee', string='Dokter', required=True, ondelete='cascade',
+        help='Dokter yang dipetakan ke unit pelayanan.'
+    )
 
-    # Satu kolom yang bisa pilih dari 3 master: Jenis Pelayanan / Poli / Divisi
+    # Pilih salah satu sumber: Jenis Pelayanan / Poli / Divisi
     pelayanan_ref = fields.Reference(
         selection=[
             ('mst.service.types', 'Jenis Pelayanan'),
-            ('mst.poli', 'Poli'),
-            ('mst.divisi', 'Divisi'),
+            ('mst.poli',          'Poli'),
+            ('mst.divisi',        'Divisi'),
         ],
-        string='Pelayanan',
-        required=True,
+        string='Pelayanan', required=True,
+        help='Pilih salah satu level unit pelayanan.'
     )
 
+    # --- Helper fields (diset otomatis dari pelayanan_ref) ---
+    service_type_id = fields.Many2one('mst.service.types', string='Jenis Pelayanan', index=True,
+                                      compute='_compute_keys', store=True, readonly=True)
+    poli_id         = fields.Many2one('mst.poli',          string='Poli',            index=True,
+                                      compute='_compute_keys', store=True, readonly=True)
+    divisi_id       = fields.Many2one('mst.divisi',        string='Divisi',          index=True,
+                                      compute='_compute_keys', store=True, readonly=True)
+
     active = fields.Boolean(string='Aktif', default=True)
+
+    _sql_constraints = [
+        ('code_unique', 'unique(code)', 'Kode mapping harus unik.'),
+    ]
+
+    @api.depends('pelayanan_ref')
+    def _compute_keys(self):
+        """Turunkan jenjang hirarki dari pilihan Reference agar gampang di-domain di tempat lain."""
+        for rec in self:
+            rec.service_type_id = False
+            rec.poli_id = False
+            rec.divisi_id = False
+            pr = rec.pelayanan_ref
+            if not pr:
+                continue
+            if pr._name == 'mst.service.types':
+                rec.service_type_id = pr
+            elif pr._name == 'mst.poli':
+                rec.poli_id = pr
+                rec.service_type_id = pr.service_type_id
+            elif pr._name == 'mst.divisi':
+                rec.divisi_id = pr
+                rec.poli_id = pr.poli_id
+                rec.service_type_id = pr.poli_id.service_type_id
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -292,8 +329,25 @@ class mst_unit_pelayanan_dokter(models.Model):
                 vals['code'] = self.env['ir.sequence'].next_by_code('mst.unit.pelayanan.dokter') or '/'
         return super().create(vals_list)
 
-    # (opsional) cegah baris tanpa pilihan pelayanan
-    def _check_any_pelayanan(self):
+    # Pastikan satu baris mapping tidak diduplikasi (employee + titik tujuan sama)
+    @api.constrains('employee_id', 'service_type_id', 'poli_id', 'divisi_id')
+    def _check_duplicate(self):
         for rec in self:
-            if not rec.pelayanan_ref:
-                raise ValueError(_("Pilih satu Pelayanan (Jenis Pelayanan / Poli / Divisi)."))
+            domain = [
+                ('id', '!=', rec.id),
+                ('employee_id', '=', rec.employee_id.id),
+                ('service_type_id', '=', rec.service_type_id.id or False),
+                ('poli_id', '=', rec.poli_id.id or False),
+                ('divisi_id', '=', rec.divisi_id.id or False),
+            ]
+            if self.search_count(domain):
+                raise ValidationError(_('Mapping dokter ini sudah ada untuk unit yang sama.'))
+
+    # (opsional) tampilkan nama yang informatif
+    def name_get(self):
+        res = []
+        for rec in self:
+            part = rec.divisi_id.name or rec.poli_id.name or rec.service_type_id.name or '-'
+            name = f"{rec.employee_id.name} - {part}"
+            res.append((rec.id, name))
+        return res

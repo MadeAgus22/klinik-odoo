@@ -1,60 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
   <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="clinic_odoo.list">
-      <field name="name">clinic_odoo list</field>
-      <field name="model">clinic_odoo.clinic_odoo</field>
-      <field name="arch" type="xml">
-        <list>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </list>
-      </field>
-    </record>
--->
 
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="clinic_odoo.action_window">
-      <field name="name">clinic_odoo window</field>
-      <field name="res_model">clinic_odoo.clinic_odoo</field>
-      <field name="view_mode">list,form</field>
-    </record>
--->
+    <!-- ROOT APP MENU + ICON -->
+    <menuitem id="menu_dashboard_clinic"
+              name="Clinic"
+              web_icon="clinic_odoo,static/description/icon_clinic.png"/>
 
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="clinic_odoo.action_server">
-      <field name="name">clinic_odoo server</field>
-      <field name="model_id" ref="model_clinic_odoo_clinic_odoo"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "list,form",
-          "res_model": model._name,
-        }
-      </field>
-    </record>
--->
-
-    <!-- Top menu item -->
-<!--
-    <menuitem name="clinic_odoo" id="clinic_odoo.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="clinic_odoo.menu_1" parent="clinic_odoo.menu_root"/>
-    <menuitem name="Menu 2" id="clinic_odoo.menu_2" parent="clinic_odoo.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="clinic_odoo.menu_1_list" parent="clinic_odoo.menu_1"
-              action="clinic_odoo.action_window"/>
-    <menuitem name="Server to list" id="clinic_odoo" parent="clinic_odoo.menu_2"
-              action="clinic_odoo.action_server"/>
--->
   </data>
 </odoo>

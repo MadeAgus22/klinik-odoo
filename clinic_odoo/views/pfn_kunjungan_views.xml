@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- LIST -->
+    <record id="pfn_kunjungan_view_list" model="ir.ui.view">
+      <field name="name">pfn.kunjungan.pasien.list</field>
+      <field name="model">pfn.kunjungan.pasien</field>
+      <field name="arch" type="xml">
+        <list string="Kunjungan Pasien">
+          <field name="no_reg"/>
+          <!-- pakai patient_id (Many2one) agar bisa diklik ke master pasien -->
+          <field name="patient_id" string="Pasien"/>
+          <field name="service_type_id" string="Jenis Pelayanan"/>
+          <field name="poli_id" string="Poli"/>
+          <field name="divisi_id" string="Divisi"/>
+          <field name="doctor_id" string="Dokter"/>
+          <field name="visit_datetime" string="Tanggal &amp; Jam"/>
+          <field name="queue_no" string="No. Antrian"/>
+          <field name="status_kunjungan"/>
+          <field name="status_pelayanan"/>
+          <!-- simpan visit_date untuk opsi group_by (boleh disembunyikan) -->
+          <field name="visit_date" invisible="1"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="pfn_kunjungan_view_form" model="ir.ui.view">
+      <field name="name">pfn.kunjungan.pasien.form</field>
+      <field name="model">pfn.kunjungan.pasien</field>
+      <field name="arch" type="xml">
+        <form string="Kunjungan Pasien">
+          <sheet>
+            <group>
+              <group string="Data Pasien">
+                <!-- Gunakan M2O pasien. Matikan quick-create agar buka form penuh -->
+                <field name="patient_id"
+                       placeholder="Ketik nama/No. RM untuk mencari atau buat pasien baru"
+                       options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                <field name="no_rm" readonly="1"/>
+                <field name="name" readonly="1"/>
+                <field name="no_identitas" readonly="1"/>
+                <field name="tempat_lahir" readonly="1"/>
+                <field name="tanggal_lahir" readonly="1"/>
+                <field name="umur_display" readonly="1"/>
+                <field name="gender" readonly="1"/>
+                <field name="phone" readonly="1"/>
+                <field name="email" readonly="1"/>
+                <!-- Tombol alternatif jika mau pakai dialog create pasien -->
+                <!--
+                <button name="action_open_create_patient" type="object"
+                        string="Pasien Baru" class="oe_highlight"/>
+                -->
+              </group>
+
+              <group string="Data Registrasi">
+                <field name="no_reg" readonly="1"/>
+                <field name="service_type_id"/>
+                <field name="poli_id"/>
+                <field name="divisi_id"/>
+                <field name="visit_datetime"/>
+                <!-- domain ini redundant (sudah ada di field), tapi aman untuk dibiarkan -->
+                <field name="doctor_id" string="Dokter"
+                       domain="[('id','in', available_doctor_ids)]"/>
+                <field name="queue_no" readonly="1"/>
+              </group>
+            </group>
+
+            <group string="Status">
+              <field name="status_kunjungan"/>
+              <field name="status_pelayanan"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="pfn_kunjungan_view_search" model="ir.ui.view">
+      <field name="name">pfn.kunjungan.pasien.search</field>
+      <field name="model">pfn.kunjungan.pasien</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="no_reg"/>
+          <field name="patient_id"/>
+          <field name="service_type_id"/>
+          <field name="poli_id"/>
+          <field name="divisi_id"/>
+          <field name="doctor_id"/>
+          <field name="visit_datetime"/>
+
+          <filter name="today" string="Hari ini"
+                  domain="[('visit_date','=', context_today())]"/>
+
+          <filter name="registered" string="Teregistrasi"
+                  domain="[('status_kunjungan','=','registered')]"/>
+          <filter name="done" string="Selesai (Bayar)"
+                  domain="[('status_kunjungan','=','done')]"/>
+          <filter name="cancel" string="Batal"
+                  domain="[('status_kunjungan','=','cancel')]"/>
+
+          <group expand="0" string="Group By">
+            <filter name="grp_doctor" string="Dokter" context="{'group_by':'doctor_id'}"/>
+            <filter name="grp_date" string="Tanggal" context="{'group_by':'visit_date'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <!-- ACTION + MENU -->
+    <record id="pfn_kunjungan_action" model="ir.actions.act_window">
+      <field name="name">Kunjungan Pasien</field>
+      <field name="res_model">pfn.kunjungan.pasien</field>
+      <field name="view_mode">list,form</field>
+      <field name="search_view_id" ref="clinic_odoo.pfn_kunjungan_view_search"/>
+      <!-- otomatis aktifkan filter "Hari ini" -->
+      <field name="context">{'search_default_today': 1}</field>
+    </record>
+
+    <menuitem id="menu_pfn_kunjungan" name="Kunjungan Pasien"
+              parent="clinic_odoo.menu_pendaftaran"
+              action="pfn_kunjungan_action" sequence="20"/>
+  </data>
+</odoo>
