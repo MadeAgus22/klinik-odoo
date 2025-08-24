@@ -25,6 +25,7 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         # 'security/ir.model.access.csv',
         'data/sequence_unit_pelayanan.xml',
         'data/sequence_kunjungan.xml',
+        'data/emr_sequence.xml',
         'views/views.xml',
         # 'views/templates.xml',
         'views/mst_service_types_views.xml',
@@ -38,6 +39,8 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         'views/mst_unit_pelayanan_dokter_embed_views.xml',
         'views/pfn_data_pasien_views.xml',
         'views/pfn_kunjungan_views.xml',
+        'views/emr_views.xml',
+
 
     ],
     # only loaded in demonstration mode

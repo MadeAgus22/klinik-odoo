@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <!-- SEARCH EMR (untuk list pasien) -->
+    <record id="emr_patient_view_search" model="ir.ui.view">
+      <field name="name">emr.patient.search</field>
+      <field name="model">pfn.data.pasien</field>
+      <field name="arch" type="xml">
+        <search string="Cari Pasien">
+          <field name="no_rm"/>
+          <field name="name"/>
+          <filter string="Pasien Saya"
+                  name="my_patients"
+                  domain="[('kunjungan_ids.doctor_id.user_id','=',uid)]"/>
+          <separator/>
+          <filter string="Terregistrasi"
+                  name="registered_only"
+                  domain="[('kunjungan_ids.status_kunjungan','=','registered')]"/>
+        </search>
+      </field>
+    </record>
+
+    <!-- LIST pasien untuk EMR -->
+    <record id="emr_patient_view_list" model="ir.ui.view">
+      <field name="name">emr.patient.list</field>
+      <field name="model">pfn.data.pasien</field>
+      <field name="arch" type="xml">
+        <list string="Pasien Terregistrasi (EMR)">
+          <field name="no_rm"/>
+          <field name="name"/>
+          <field name="gender"/>
+          <field name="umur_display"/>
+          <field name="phone"/>
+          <field name="alamat"/>
+          <field name="emr_status_pelayanan" string="Status Pelayanan"/>
+          <button name="action_open_emr" type="object" string="Ambil Pasien" class="oe_highlight"/>
+        </list>
+      </field>
+    </record>
+
+    <!-- ACTION EMR: tampilkan pasien dengan kunjungan registered -->
+    <record id="emr_open_patient_action" model="ir.actions.act_window">
+      <field name="name">EMR</field>
+      <field name="res_model">pfn.data.pasien</field>
+      <field name="view_mode">list,form</field>
+      <field name="view_id" ref="emr_patient_view_list"/>
+      <field name="search_view_id" ref="emr_patient_view_search"/>
+      <field name="domain">[('kunjungan_ids.status_kunjungan','=','registered')]</field>
+      <field name="context">{}</field>
+    </record>
+
+    <!-- MENU HEADER & SUBMENU -->
+    <!-- Ganti parent bila parent menu di modulmu berbeda -->
+    <menuitem id="menu_medical_record" name="Medical Record" parent="menu_dashboard_clinic" sequence="40"/>
+    <menuitem id="menu_emr" name="EMR" parent="menu_medical_record" action="emr_open_patient_action" sequence="10"/>
+
+    <!-- FORM EMR -->
+    <record id="emr_record_view_form" model="ir.ui.view">
+      <field name="name">emr.record.form</field>
+      <field name="model">emr.record</field>
+      <field name="arch" type="xml">
+        <form string="Electronic Medical Record">
+          <sheet>
+            <!-- Atas: Pasien & Registrasi -->
+            <group>
+              <group string="Data Pasien">
+                <field name="name" readonly="1"/>
+                <field name="patient_id" readonly="1"/>
+                <field name="no_rm" readonly="1"/>
+                <field name="gender" readonly="1"/>
+                <field name="umur_display" readonly="1"/>
+                <field name="phone" readonly="1"/>
+                <field name="email" readonly="1"/>
+                <field name="alamat" readonly="1"/>
+              </group>
+              <group string="Registrasi">
+                <field name="kunjungan_id" readonly="1"/>
+                <field name="doctor_id" readonly="1"/>
+                <field name="service_type_id" readonly="1"/>
+                <field name="poli_id" readonly="1"/>
+                <field name="divisi_id" readonly="1"/>
+                <field name="visit_datetime" readonly="1"/>
+                <field name="queue_no" readonly="1"/>
+              </group>
+            </group>
+
+            <!-- Bawah: Tabs SOAP -->
+            <notebook>
+              <page string="SOAP">
+                <group>
+                  <group string="Subyektif">
+                    <field name="subj_keluhan" placeholder="Keluhan: Sakit kepala"/>
+                    <field name="subj_riwayat_peny" placeholder="Riwayat penyakit: Hipertensi"/>
+                    <field name="subj_riwayat_alergi" placeholder="Riwayat alergi: Tidak ada"/>
+                  </group>
+                  <group string="Obyektif">
+                    <field name="obj_td_sistol"/><field name="obj_td_diastol"/>
+                    <field name="obj_nadi"/>
+                    <field name="obj_suhu"/>
+                    <field name="obj_pemeriksaan_fisik" placeholder="Pemeriksaan fisik: Tidak ada kelainan"/>
+                  </group>
+                </group>
+
+                <group string="Assessment">
+                  <!-- Inline subview pakai <list> (bukan <tree>) -->
+                  <field name="diagnosis_line_ids">
+                    <list editable="bottom">
+                      <field name="diagnosa_name" string="Nama Diagnosa"/>
+                      <field name="icd10_name" string="Nama ICD-10"/>
+                      <field name="icd10_code" string="Kode ICD-10"/>
+                    </list>
+                  </field>
+                  <field name="prognosis"/>
+                </group>
+
+                <group string="Plan">
+                  <group>
+                    <field name="procedure_line_ids">
+                      <list editable="bottom">
+                        <field name="tindakan_id" string="Tindakan"/>
+                        <field name="tindakan_code" readonly="1"/>
+                        <field name="tindakan_name" readonly="1"/>
+                      </list>
+                    </field>
+                    <field name="prescription_line_ids">
+                      <list editable="bottom">
+                        <field name="obat_id" string="Obat"/>
+                        <field name="obat_name" readonly="1"/>
+                        <field name="note" string="Catatan"/>
+                      </list>
+                    </field>
+                  </group>
+                  <group>
+                    <field name="edukasi"/>
+                    <field name="rencana_tindakan"/>
+                    <field name="rencana_tanggal"/>
+                    <field name="rencana_catatan"/>
+                  </group>
+                </group>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- ACTION untuk EMR Record (dibuka dari button 'Ambil Pasien') -->
+    <record id="emr_record_action" model="ir.actions.act_window">
+      <field name="name">EMR Record</field>
+      <field name="res_model">emr.record</field>
+      <field name="view_mode">form,list</field>
+      <field name="view_id" ref="emr_record_view_form"/>
+      <field name="target">current</field>
+    </record>
+
+  </data>
+</odoo>

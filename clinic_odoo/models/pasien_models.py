@@ -108,7 +108,97 @@ class pfn_data_pasien(models.Model):
                   ('phone', operator, name)]
         recs = self.search(domain + args, limit=limit)
         return recs.name_get()
+    
 
+     # jika BELUM ada:
+    kunjungan_ids = fields.One2many(
+        'pfn.kunjungan.pasien', 'patient_id',
+        string='Kunjungan Pasien'
+    )
+
+    # --- Status Pelayanan untuk tampilan list EMR (CHAR computed) ---
+    emr_status_pelayanan = fields.Char(
+        string='Status Pelayanan',
+        compute='_compute_emr_status_pelayanan',
+        readonly=True,
+    )
+
+    def _compute_emr_status_pelayanan(self):
+        Kunj = self.env['pfn.kunjungan.pasien']
+        # ambil mapping kode->label dari selection status_pelayanan di model kunjungan
+        fdef = Kunj.fields_get(['status_pelayanan'])['status_pelayanan']
+        sel_map = dict(fdef.get('selection', []))  # contoh: {'not_served': 'Belum Dilayani', ...}
+
+        for rec in self:
+            label = False
+            # prioritas: kunjungan registered milik dokter login & masih aktif
+            dom_base = [('patient_id', '=', rec.id), ('status_kunjungan', '=', 'registered')]
+            kunj = Kunj.search(
+                dom_base + [
+                    ('doctor_id.user_id', '=', self.env.user.id),
+                    ('status_pelayanan', 'in', ['not_served', 'in_service'])
+                ],
+                order='visit_datetime desc', limit=1
+            )
+            if not kunj:
+                # fallback: kunjungan registered terbaru pasien (dokter mana saja)
+                kunj = Kunj.search(dom_base, order='visit_datetime desc', limit=1)
+
+            if kunj:
+                label = sel_map.get(kunj.status_pelayanan, kunj.status_pelayanan or False)
+            rec.emr_status_pelayanan = label
+
+    def action_open_emr(self):
+        """Ambil pasien -> set status pelayanan 'in_service' & buka/buat EMR."""
+        self.ensure_one()
+        Kunj = self.env['pfn.kunjungan.pasien']
+        user = self.env.user
+
+        # Prioritas: kunjungan registered milik dokter yang login & masih aktif
+        kunj = Kunj.search([
+            ('patient_id', '=', self.id),
+            ('status_kunjungan', '=', 'registered'),
+            ('status_pelayanan', 'in', ['not_served', 'in_service']),
+            ('doctor_id.user_id', '=', user.id),
+        ], order='visit_datetime desc', limit=1)
+
+        # Fallback: kunjungan registered terbaru pasien (dokter mana saja)
+        if not kunj:
+            kunj = Kunj.search([
+                ('patient_id', '=', self.id),
+                ('status_kunjungan', '=', 'registered'),
+            ], order='visit_datetime desc', limit=1)
+
+        if not kunj:
+            from odoo.exceptions import UserError
+            raise UserError(_("Tidak ada kunjungan aktif (registered) untuk pasien ini."))
+
+        # Update status pelayanan -> Dalam Pelayanan
+        if kunj.status_pelayanan != 'in_service':
+            kunj.write({'status_pelayanan': 'in_service'})
+
+        # Buat/ambil EMR utk kunjungan ini (1 EMR per kunjungan)
+        Emr = self.env['emr.record']
+        emr = Emr.search([('kunjungan_id', '=', kunj.id)], limit=1)
+        if not emr:
+            emr = Emr.create({
+                'patient_id': self.id,
+                'kunjungan_id': kunj.id,
+                'doctor_id': kunj.doctor_id.id if kunj.doctor_id else False,
+            })
+
+        # Buka form EMR
+        action = self.env.ref('clinic_odoo.emr_record_action').read()[0]
+        action.update({
+            'view_mode': 'form',
+            'res_id': emr.id,
+            'context': {
+                'default_patient_id': self.id,
+                'default_kunjungan_id': kunj.id,
+                'default_doctor_id': kunj.doctor_id.id if kunj.doctor_id else False,
+            },
+        })
+        return action
 
 class pfn_kunjungan_pasien(models.Model):
     _name = 'pfn.kunjungan.pasien'
