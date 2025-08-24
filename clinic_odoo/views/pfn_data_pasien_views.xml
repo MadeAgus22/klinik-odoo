@@ -11,6 +11,7 @@
           <field name="no_rm" string="No. RM"/>
           <field name="name" string="Nama Lengkap"/>
           <field name="no_identitas" string="No. KTP"/>
+          <field name="alamat" string="Alamat"/>
           <field name="gender" string="Jenis Kelamin"/>
           <field name="phone" string="HP"/>
           <field name="email" string="E-mail"/>
@@ -37,6 +38,7 @@
               </group>
               <group>
                 <field name="gender" widget="radio"/>
+                <field name="alamat"/>
                 <field name="phone"/>
                 <field name="email" widget="email"/>
                 <field name="active"/>

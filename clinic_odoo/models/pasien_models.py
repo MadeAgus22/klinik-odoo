@@ -34,6 +34,7 @@ class pfn_data_pasien(models.Model):
     )
     phone = fields.Char(string='Nomer HP', required=True)
     email = fields.Char(string='E-mail', required=True)
+    alamat = fields.Char(string='Alamat', required=True) 
 
     active = fields.Boolean(string='Aktif', default=True)
 
@@ -132,6 +133,8 @@ class pfn_kunjungan_pasien(models.Model):
     gender        = fields.Selection(related='patient_id.gender', string='Jenis Kelamin', store=True, readonly=True)
     phone         = fields.Char(related='patient_id.phone', string='HP', store=True, readonly=True)
     email         = fields.Char(related='patient_id.email', string='E-mail', store=True, readonly=True)
+
+    alamat        = fields.Char(related='patient_id.alamat', string='Alamat', store=True, readonly=True)
 
     # ------------------- REGISTRASI -------------------
     no_reg = fields.Char(string='No. Registrasi', readonly=True, copy=False, index=True)

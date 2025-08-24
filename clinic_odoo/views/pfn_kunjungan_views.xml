@@ -11,6 +11,7 @@
           <field name="no_reg"/>
           <!-- pakai patient_id (Many2one) agar bisa diklik ke master pasien -->
           <field name="patient_id" string="Pasien"/>
+          <field name="alamat" string="Alamat"/>
           <field name="service_type_id" string="Jenis Pelayanan"/>
           <field name="poli_id" string="Poli"/>
           <field name="divisi_id" string="Divisi"/>
@@ -45,6 +46,7 @@
                 <field name="tanggal_lahir" readonly="1"/>
                 <field name="umur_display" readonly="1"/>
                 <field name="gender" readonly="1"/>
+                <field name="alamat" readonly="1"/>
                 <field name="phone" readonly="1"/>
                 <field name="email" readonly="1"/>
                 <!-- Tombol alternatif jika mau pakai dialog create pasien -->
