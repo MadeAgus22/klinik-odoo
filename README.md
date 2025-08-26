@@ -1,4 +1,5 @@
-# Clinic
+# Odoo Clinic
+<img width="1366" height="607" alt="image" src="https://github.com/user-attachments/assets/f1bb61d8-a846-4d61-8a0f-8f1d9e22684e" />
 
 # Menu Pendaftaran
 <img width="1366" height="595" alt="image" src="https://github.com/user-attachments/assets/577af9f7-0129-41ee-ac99-54b781855e69" />
