@@ -2,70 +2,116 @@
 <odoo>
   <data>
 
-    <!-- SEARCH EMR (untuk list pasien) -->
-    <record id="emr_patient_view_search" model="ir.ui.view">
-      <field name="name">emr.patient.search</field>
-      <field name="model">pfn.data.pasien</field>
+    <!-- =========================================================
+         ATURAN VIEW ODOO 18 (ringkas)
+         - Gunakan <list> untuk list view (pengganti <tree> klasik).
+         - Dalam Form untuk one2many, gunakan <list editable="bottom">.
+         - view_mode untuk list → "list,form".
+         - Boleh gunakan decoration-* pada <list> (status warna).
+         ========================================================= -->
+    
+    <!-- ================================ -->
+    <!-- SEARCH: beri prioritas tinggi (angka besar = prioritas rendah) -->
+    <!-- ================================ -->
+    <record id="view_emr_kunjungan_search" model="ir.ui.view">
+      <field name="name">emr.kunjungan.search</field>
+      <field name="model">pfn.kunjungan.pasien</field>
+      <field name="priority">90</field>
       <field name="arch" type="xml">
-        <search string="Cari Pasien">
-          <field name="no_rm"/>
-          <field name="name"/>
-          <filter string="Pasien Saya"
-                  name="my_patients"
-                  domain="[('kunjungan_ids.doctor_id.user_id','=',uid)]"/>
+        <search string="Cari Pasien Terregistrasi">
+          <field name="no_reg"/>
+          <field name="patient_id"/>
+          <field name="doctor_id"/>
           <separator/>
-          <filter string="Terregistrasi"
-                  name="registered_only"
-                  domain="[('kunjungan_ids.status_kunjungan','=','registered')]"/>
+          <filter string="Pasien Saya" name="my_patients"
+                  domain="[('doctor_id.user_id', '=', uid)]"/>
+          <filter string="Belum Dilayani" name="not_served"
+                  domain="[('status_pelayanan','=','not_served')]"/>
+          <filter string="Dalam Pelayanan" name="in_service"
+                  domain="[('status_pelayanan','=','in_service')]"/>
+          <filter string="Selesai" name="finished"
+                  domain="[('status_pelayanan','=','finished')]"/>
+          <filter string="Terverifikasi" name="verified"
+                  domain="[('status_pelayanan','=','verified')]"/>
+          <group expand="0" string="Group By">
+            <filter string="Dokter" name="grp_doctor" context="{'group_by':'doctor_id'}"/>
+            <filter string="Poli" name="grp_poli" context="{'group_by':'poli_id'}"/>
+            <filter string="Tanggal" name="grp_date" context="{'group_by':'visit_datetime'}"/>
+          </group>
         </search>
       </field>
     </record>
 
-    <!-- LIST pasien untuk EMR -->
-    <record id="emr_patient_view_list" model="ir.ui.view">
-      <field name="name">emr.patient.list</field>
-      <field name="model">pfn.data.pasien</field>
+    <!-- ================================ -->
+    <!-- LIST EMR: turunkan prioritas supaya tidak ‘mengambil alih’ action lain -->
+    <!-- ================================ -->
+    <record id="view_emr_kunjungan_list" model="ir.ui.view">
+      <field name="name">emr.kunjungan.list</field>
+      <field name="model">pfn.kunjungan.pasien</field>
+      <field name="priority">90</field>
       <field name="arch" type="xml">
-        <list string="Pasien Terregistrasi (EMR)">
-          <field name="no_rm"/>
-          <field name="name"/>
-          <field name="gender"/>
-          <field name="umur_display"/>
-          <field name="phone"/>
-          <field name="alamat"/>
-          <field name="emr_status_pelayanan" string="Status Pelayanan"/>
-          <button name="action_open_emr" type="object" string="Ambil Pasien" class="oe_highlight"/>
+        <list string="EMR - Pasien Teregistrasi"
+              create="false" delete="false" edit="false"
+              decoration-success="status_pelayanan == 'verified'"
+              decoration-warning="status_pelayanan == 'in_service'"
+              decoration-muted="status_pelayanan == 'not_served'">
+          <field name="no_reg" string="Nomor Registrasi"/>
+          <field name="patient_id" string="Nama Lengkap"/>
+          <field name="gender" string="Jenis Kelamin"/>
+          <field name="umur_display" string="Umur"/>
+          <field name="phone" string="Nomor HP"/>
+          <field name="alamat" string="Alamat"/>
+          <field name="status_pelayanan" string="Status Pelayanan"/>
+          <field name="visit_datetime" string="Tanggal &amp; Jam"/>
+          <button name="action_take_patient" type="object" string="Ambil Pasien" class="oe_highlight"/>
         </list>
       </field>
     </record>
 
-    <!-- ACTION EMR: tampilkan pasien dengan kunjungan registered -->
-    <record id="emr_open_patient_action" model="ir.actions.act_window">
+    <!-- ================================ -->
+    <!-- ACTION EMR: pin view agar action ini selalu pakai view EMR -->
+    <!-- ================================ -->
+    <record id="action_emr_kunjungan" model="ir.actions.act_window">
       <field name="name">EMR</field>
-      <field name="res_model">pfn.data.pasien</field>
+      <field name="res_model">pfn.kunjungan.pasien</field>
       <field name="view_mode">list,form</field>
-      <field name="view_id" ref="emr_patient_view_list"/>
-      <field name="search_view_id" ref="emr_patient_view_search"/>
-      <field name="domain">[('kunjungan_ids.status_kunjungan','=','registered')]</field>
+      <!-- urutan & jenis view yang dipakai HANYA untuk action ini -->
+      <field name="views" eval="[(ref('clinic_odoo.view_emr_kunjungan_list'), 'list'), (False, 'form')]"/>
+      <field name="search_view_id" ref="clinic_odoo.view_emr_kunjungan_search"/>
+      <field name="domain">[('status_kunjungan','=','registered')]</field>
       <field name="context">{}</field>
     </record>
 
-    <!-- MENU HEADER & SUBMENU -->
-    <!-- Ganti parent bila parent menu di modulmu berbeda -->
-    <menuitem id="menu_medical_record" name="Medical Record" parent="menu_dashboard_clinic" sequence="40"/>
-    <menuitem id="menu_emr" name="EMR" parent="menu_medical_record" action="emr_open_patient_action" sequence="10"/>
 
-    <!-- FORM EMR -->
+    <!-- ========================= -->
+    <!--  MENU -->
+    <!-- ========================= -->
+    <menuitem id="menu_medical_record" name="Medical Record"
+              parent="menu_dashboard_clinic" sequence="40"/>
+    <menuitem id="menu_emr" name="EMR"
+              parent="menu_medical_record" action="action_emr_kunjungan" sequence="10"/>
+
+    <!-- ========================= -->
+    <!--  FORM: EMR (emr.record)  -->
+    <!-- ========================= -->
     <record id="emr_record_view_form" model="ir.ui.view">
       <field name="name">emr.record.form</field>
       <field name="model">emr.record</field>
       <field name="arch" type="xml">
         <form string="Electronic Medical Record">
+          <header>
+            <!-- name = No. Registrasi (related dari kunjungan.no_reg) -->
+            <field name="name" class="oe_inline" readonly="1"/>
+            <!-- statusbar -->
+            <field name="state" widget="statusbar"
+                   statusbar_visible="not_served,in_service,finished,verified"
+                   string="Status"/>
+          </header>
+
           <sheet>
-            <!-- Atas: Pasien & Registrasi -->
+            <!-- Atas: Data Pasien & Registrasi -->
             <group>
               <group string="Data Pasien">
-                <field name="name" readonly="1"/>
                 <field name="patient_id" readonly="1"/>
                 <field name="no_rm" readonly="1"/>
                 <field name="gender" readonly="1"/>
@@ -95,7 +141,8 @@
                     <field name="subj_riwayat_alergi" placeholder="Riwayat alergi: Tidak ada"/>
                   </group>
                   <group string="Obyektif">
-                    <field name="obj_td_sistol"/><field name="obj_td_diastol"/>
+                    <field name="obj_td_sistol"/>
+                    <field name="obj_td_diastol"/>
                     <field name="obj_nadi"/>
                     <field name="obj_suhu"/>
                     <field name="obj_pemeriksaan_fisik" placeholder="Pemeriksaan fisik: Tidak ada kelainan"/>
@@ -103,7 +150,7 @@
                 </group>
 
                 <group string="Assessment">
-                  <!-- Inline subview pakai <list> (bukan <tree>) -->
+                  <!-- One2many pakai <list> (Odoo 18) -->
                   <field name="diagnosis_line_ids">
                     <list editable="bottom">
                       <field name="diagnosa_name" string="Nama Diagnosa"/>
@@ -145,11 +192,13 @@
       </field>
     </record>
 
-    <!-- ACTION untuk EMR Record (dibuka dari button 'Ambil Pasien') -->
+    <!-- ========================================= -->
+    <!--  ACTION: EMR Record (dibuka dari tombol)  -->
+    <!-- ========================================= -->
     <record id="emr_record_action" model="ir.actions.act_window">
       <field name="name">EMR Record</field>
       <field name="res_model">emr.record</field>
-      <field name="view_mode">form,list</field>
+      <field name="view_mode">form</field>
       <field name="view_id" ref="emr_record_view_form"/>
       <field name="target">current</field>
     </record>

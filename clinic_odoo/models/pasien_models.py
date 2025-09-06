@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
-from datetime import date, datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 import random
 import re
 
 
+# =========================
+#   DATA PASIEN
+# =========================
 class pfn_data_pasien(models.Model):
     _name = 'pfn.data.pasien'
     _description = 'Pendaftaran - Data Pasien'
     _rec_name = 'name'
 
-    # --- Identitas utama ---
+    # Identitas
     no_rm = fields.Char(
         string='Nomer Rekam Medis',
         required=True, copy=False, readonly=True, index=True,
@@ -24,7 +27,6 @@ class pfn_data_pasien(models.Model):
     tempat_lahir = fields.Char(string='Tempat Lahir', required=True)
     tanggal_lahir = fields.Date(string='Tanggal Lahir', required=True)
 
-    # Umur tampil “XX tahun YY bulan”
     umur_display = fields.Char(
         string='Umur', compute='_compute_umur', store=True, readonly=True)
 
@@ -34,7 +36,7 @@ class pfn_data_pasien(models.Model):
     )
     phone = fields.Char(string='Nomer HP', required=True)
     email = fields.Char(string='E-mail', required=True)
-    alamat = fields.Char(string='Alamat', required=True) 
+    alamat = fields.Char(string='Alamat', required=True)
 
     active = fields.Boolean(string='Aktif', default=True)
 
@@ -43,7 +45,20 @@ class pfn_data_pasien(models.Model):
         ('no_identitas_unique', 'unique(no_identitas)', 'No. KTP sudah digunakan!'),
     ]
 
-    # ----- Generate No. RM otomatis (YYMM + 4 digit acak) -----
+    # Relasi → kunjungan pasien
+    kunjungan_ids = fields.One2many(
+        'pfn.kunjungan.pasien', 'patient_id',
+        string='Kunjungan Pasien'
+    )
+
+    # Status Pelayanan (untuk list pasien/EMR)
+    emr_status_pelayanan = fields.Char(
+        string='Status Pelayanan',
+        compute='_compute_emr_status_pelayanan',
+        readonly=True,
+    )
+
+    # ---------- computes / constrains ----------
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -51,7 +66,6 @@ class pfn_data_pasien(models.Model):
                 today = fields.Date.context_today(self)
                 yy = f"{today.year % 100:02d}"
                 mm = f"{today.month:02d}"
-                # cari kombinasi unik
                 while True:
                     rand4 = f"{random.randint(0, 9999):04d}"
                     candidate = f"{yy}{mm}{rand4}"
@@ -60,7 +74,6 @@ class pfn_data_pasien(models.Model):
                         break
         return super().create(vals_list)
 
-    # ----- Hitung umur “XX tahun YY bulan” -----
     @api.depends('tanggal_lahir')
     def _compute_umur(self):
         today = date.today()
@@ -71,14 +84,13 @@ class pfn_data_pasien(models.Model):
             else:
                 rec.umur_display = False
 
-    # ----- Validasi email sederhana -----
     @api.constrains('email')
     def _check_email(self):
         pattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
         for rec in self:
             if rec.email and not re.match(pattern, rec.email):
                 raise ValidationError(_("Format E-mail tidak valid."))
-  
+
     def action_toggle_active(self):
         for rec in self:
             rec.active = not rec.active
@@ -88,10 +100,9 @@ class pfn_data_pasien(models.Model):
         for r in self:
             label_parts = []
             if r.no_rm:
-                label_parts.append(r.no_rm)      # contoh: 25080188
+                label_parts.append(r.no_rm)
             if r.name:
-                label_parts.append(r.name)       # contoh: Umar
-            # tampil: "25080188 | Umar"
+                label_parts.append(r.name)
             res.append((r.id, " | ".join(label_parts) or r.display_name))
         return res
 
@@ -108,30 +119,13 @@ class pfn_data_pasien(models.Model):
                   ('phone', operator, name)]
         recs = self.search(domain + args, limit=limit)
         return recs.name_get()
-    
-
-     # jika BELUM ada:
-    kunjungan_ids = fields.One2many(
-        'pfn.kunjungan.pasien', 'patient_id',
-        string='Kunjungan Pasien'
-    )
-
-    # --- Status Pelayanan untuk tampilan list EMR (CHAR computed) ---
-    emr_status_pelayanan = fields.Char(
-        string='Status Pelayanan',
-        compute='_compute_emr_status_pelayanan',
-        readonly=True,
-    )
 
     def _compute_emr_status_pelayanan(self):
         Kunj = self.env['pfn.kunjungan.pasien']
-        # ambil mapping kode->label dari selection status_pelayanan di model kunjungan
         fdef = Kunj.fields_get(['status_pelayanan'])['status_pelayanan']
-        sel_map = dict(fdef.get('selection', []))  # contoh: {'not_served': 'Belum Dilayani', ...}
-
+        sel_map = dict(fdef.get('selection', []))
         for rec in self:
             label = False
-            # prioritas: kunjungan registered milik dokter login & masih aktif
             dom_base = [('patient_id', '=', rec.id), ('status_kunjungan', '=', 'registered')]
             kunj = Kunj.search(
                 dom_base + [
@@ -141,9 +135,7 @@ class pfn_data_pasien(models.Model):
                 order='visit_datetime desc', limit=1
             )
             if not kunj:
-                # fallback: kunjungan registered terbaru pasien (dokter mana saja)
                 kunj = Kunj.search(dom_base, order='visit_datetime desc', limit=1)
-
             if kunj:
                 label = sel_map.get(kunj.status_pelayanan, kunj.status_pelayanan or False)
             rec.emr_status_pelayanan = label
@@ -154,7 +146,6 @@ class pfn_data_pasien(models.Model):
         Kunj = self.env['pfn.kunjungan.pasien']
         user = self.env.user
 
-        # Prioritas: kunjungan registered milik dokter yang login & masih aktif
         kunj = Kunj.search([
             ('patient_id', '=', self.id),
             ('status_kunjungan', '=', 'registered'),
@@ -162,7 +153,6 @@ class pfn_data_pasien(models.Model):
             ('doctor_id.user_id', '=', user.id),
         ], order='visit_datetime desc', limit=1)
 
-        # Fallback: kunjungan registered terbaru pasien (dokter mana saja)
         if not kunj:
             kunj = Kunj.search([
                 ('patient_id', '=', self.id),
@@ -170,50 +160,48 @@ class pfn_data_pasien(models.Model):
             ], order='visit_datetime desc', limit=1)
 
         if not kunj:
-            from odoo.exceptions import UserError
             raise UserError(_("Tidak ada kunjungan aktif (registered) untuk pasien ini."))
 
-        # Update status pelayanan -> Dalam Pelayanan
         if kunj.status_pelayanan != 'in_service':
             kunj.write({'status_pelayanan': 'in_service'})
 
-        # Buat/ambil EMR utk kunjungan ini (1 EMR per kunjungan)
         Emr = self.env['emr.record']
         emr = Emr.search([('kunjungan_id', '=', kunj.id)], limit=1)
         if not emr:
             emr = Emr.create({
-                'patient_id': self.id,
+                # NOTE: patient_id TIDAK diisi (related & readonly di emr.record)
                 'kunjungan_id': kunj.id,
                 'doctor_id': kunj.doctor_id.id if kunj.doctor_id else False,
             })
 
-        # Buka form EMR
         action = self.env.ref('clinic_odoo.emr_record_action').read()[0]
         action.update({
             'view_mode': 'form',
             'res_id': emr.id,
             'context': {
-                'default_patient_id': self.id,
                 'default_kunjungan_id': kunj.id,
                 'default_doctor_id': kunj.doctor_id.id if kunj.doctor_id else False,
             },
         })
         return action
 
+
+# =========================
+#   KUNJUNGAN PASIEN
+# =========================
 class pfn_kunjungan_pasien(models.Model):
     _name = 'pfn.kunjungan.pasien'
     _description = 'Kunjungan Pasien'
     _rec_name = 'no_reg'
     _order = 'visit_datetime desc, id desc'
 
-    # ------------------- PASIEN -------------------
+    # Pasien
     no_rm_input = fields.Char(
         string='No. RM (Cari)',
         help='Ketik No. RM atau Nama lalu Enter untuk memuat data pasien'
     )
-    patient_id = fields.Many2one('pfn.data.pasien', string='Pasien')
+    patient_id = fields.Many2one('pfn.data.pasien', string='Pasien', ondelete='restrict', index=True)
 
-    # biodata tampil (ikut patient_id)
     no_rm         = fields.Char(related='patient_id.no_rm', string='No. RM', store=True, readonly=True)
     name          = fields.Char(related='patient_id.name', string='Nama Lengkap', store=True, readonly=True)
     no_identitas  = fields.Char(related='patient_id.no_identitas', string='No. KTP', store=True, readonly=True)
@@ -223,19 +211,18 @@ class pfn_kunjungan_pasien(models.Model):
     gender        = fields.Selection(related='patient_id.gender', string='Jenis Kelamin', store=True, readonly=True)
     phone         = fields.Char(related='patient_id.phone', string='HP', store=True, readonly=True)
     email         = fields.Char(related='patient_id.email', string='E-mail', store=True, readonly=True)
-
     alamat        = fields.Char(related='patient_id.alamat', string='Alamat', store=True, readonly=True)
 
-    # ------------------- REGISTRASI -------------------
+    # Registrasi
     no_reg = fields.Char(string='No. Registrasi', readonly=True, copy=False, index=True)
 
-    service_type_id = fields.Many2one('mst.service.types', string='Jenis Pelayanan', ondelete='restrict')
+    service_type_id = fields.Many2one('mst.service.types', string='Jenis Pelayanan', ondelete='restrict', index=True)
     poli_id = fields.Many2one(
-        'mst.poli', string='Poli', ondelete='restrict',
+        'mst.poli', string='Poli', ondelete='restrict', index=True,
         domain="[('service_type_id','=',service_type_id)]"
     )
     divisi_id = fields.Many2one(
-        'mst.divisi', string='Divisi', ondelete='restrict',
+        'mst.divisi', string='Divisi', ondelete='restrict', index=True,
         domain="[('poli_id','=',poli_id)]"
     )
 
@@ -244,13 +231,12 @@ class pfn_kunjungan_pasien(models.Model):
         default=lambda self: fields.Datetime.now(),
         required=True
     )
-    # helper untuk constraint / query harian
     visit_date = fields.Date(string='Tanggal (hari)',
                              compute='_compute_visit_date', store=True, index=True)
 
     doctor_id = fields.Many2one(
-        'hr.employee', string='Dokter Pemeriksa', ondelete='restrict',
-        domain="[('id','in', available_doctor_ids)]"  # dibatasi oleh compute di bawah
+        'hr.employee', string='Dokter Pemeriksa', ondelete='restrict', index=True,
+        domain="[('id','in', available_doctor_ids)]"
     )
     available_doctor_ids = fields.Many2many(
         'hr.employee', compute='_compute_available_doctor_ids',
@@ -263,26 +249,29 @@ class pfn_kunjungan_pasien(models.Model):
         ('registered', 'Teregistrasi'),
         ('cancel', 'Batal Kunjungan'),
         ('done', 'Selesai (Bayar)'),
-    ], string='Status Kunjungan', default='registered', required=True)
+    ], string='Status Kunjungan', default='registered', required=True, index=True)
 
     status_pelayanan = fields.Selection([
         ('not_served', 'Belum Dilayani'),
         ('in_service', 'Dalam Pelayanan'),
         ('finished', 'Selesai'),
         ('verified', 'Sudah Verifikasi'),
-    ], string='Status Pelayanan', default='not_served', required=True)
+    ], string='Status Pelayanan', default='not_served', required=True, index=True)
+
+    state = fields.Selection(related='status_pelayanan', string='Status', store=False)
+
+    emr_id = fields.Many2one('emr.record', string='EMR', readonly=True, copy=False)
 
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
 
     _sql_constraints = [
         ('pfn_no_reg_unique', 'unique(no_reg)', 'Nomor Registrasi harus unik!'),
-        # antrian unik per dokter per hari
         ('unique_queue_per_doctor_day',
          'unique(doctor_id, visit_date, queue_no)',
          'Nomor antrian harus unik untuk dokter pada tanggal yang sama!'),
     ]
 
-    # ------------------- COMPUTES & ONCHANGES -------------------
+    # ---------- computes / onchange ----------
     @api.depends('visit_datetime')
     def _compute_visit_date(self):
         for rec in self:
@@ -290,7 +279,6 @@ class pfn_kunjungan_pasien(models.Model):
 
     @api.onchange('no_rm_input')
     def _onchange_no_rm_input(self):
-        """Cari pasien by exact RM atau nama (ilike)."""
         txt = (self.no_rm_input or '').strip()
         if not txt:
             self.patient_id = False
@@ -306,7 +294,6 @@ class pfn_kunjungan_pasien(models.Model):
         Map = self.env['mst.unit.pelayanan.dokter']
         for rec in self:
             domain = [('active', '=', True)]
-            # prioritas: divisi > poli > jenis pelayanan
             if rec.divisi_id:
                 domain.append(('divisi_id', '=', rec.divisi_id.id))
             elif rec.poli_id:
@@ -334,22 +321,20 @@ class pfn_kunjungan_pasien(models.Model):
 
     @api.onchange('doctor_id', 'visit_datetime')
     def _onchange_queue_no(self):
-        """Tampilkan preview antrian saat user ganti dokter/tanggal."""
         if self.doctor_id:
             vdt = self.visit_datetime or fields.Datetime.now()
             self.queue_no = self._next_queue_no(self.doctor_id.id, vdt)
         else:
             self.queue_no = 0
 
-    # ------------------- ACTIONS -------------------
+    # ---------- actions ----------
     def action_open_create_patient(self):
         action = self.env.ref('clinic_odoo.pfn_data_pasien_action').read()[0]
         action.update({'view_mode': 'form', 'target': 'new', 'context': {'default_no_rm': False}})
         return action
 
-    # ------------------- HELPERS -------------------
+    # ---------- helpers ----------
     def _next_queue_no(self, doctor_id, visit_dt):
-        """Ambil nomor antrian berikutnya (mulai 1) per dokter per-hari."""
         if not doctor_id or not visit_dt:
             return 0
         the_date = fields.Date.to_date(visit_dt)
@@ -359,50 +344,51 @@ class pfn_kunjungan_pasien(models.Model):
         ], order='queue_no desc', limit=1)
         return (last.queue_no or 0) + 1
 
-    # ------------------- ORM OVERRIDES -------------------
-    @api.model
-    def create(self, vals):
-        # pastikan visit_date terisi
-        vdt = vals.get('visit_datetime') or fields.Datetime.now()
-        vals.setdefault('visit_date', fields.Date.to_date(vdt))
+    # ---------- overrides ----------
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # visit_date
+            vdt = vals.get('visit_datetime') or fields.Datetime.now()
+            vals.setdefault('visit_date', fields.Date.to_date(vdt))
 
-        # set nomor antrian bila ada dokter
-        if vals.get('doctor_id') and not vals.get('queue_no'):
-            vals['queue_no'] = self._next_queue_no(vals['doctor_id'], vdt)
+            # queue_no bila ada dokter
+            if vals.get('doctor_id') and not vals.get('queue_no'):
+                vals['queue_no'] = self._next_queue_no(vals['doctor_id'], vdt)
 
-        # nomor registrasi
-        if not vals.get('no_reg'):
-            poli = self.env['mst.poli'].browse(vals.get('poli_id')) if vals.get('poli_id') else False
-            if not poli:
-                raise UserError(_('Pilih Poli terlebih dahulu untuk membuat Nomor Registrasi.'))
+            # nomor registrasi
+            if not vals.get('no_reg'):
+                poli = self.env['mst.poli'].browse(vals.get('poli_id')) if vals.get('poli_id') else False
+                if not poli:
+                    raise UserError(_('Pilih Poli terlebih dahulu untuk membuat Nomor Registrasi.'))
 
-            visit_dt = fields.Datetime.to_datetime(vdt)
-            ym = visit_dt.strftime('%Y%m')  # tahun+bulan
+                visit_dt = fields.Datetime.to_datetime(vdt)
+                ym = visit_dt.strftime('%Y%m')
 
-            seq = self.env['ir.sequence']\
-                .with_context(ir_sequence_date=visit_dt.date())\
-                .next_by_code('pfn.kunjungan.monthly') or '0'
-            seq = str(seq).zfill(4)
+                seq = self.env['ir.sequence']\
+                    .with_context(ir_sequence_date=visit_dt.date())\
+                    .next_by_code('pfn.kunjungan.monthly') or '0'
+                seq = str(seq).zfill(4)
 
-            visit_index = 1
-            if vals.get('patient_id'):
-                start = visit_dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-                end = (start + relativedelta(months=1))
-                count = self.search_count([
-                    ('patient_id', '=', vals['patient_id']),
-                    ('visit_datetime', '>=', start),
-                    ('visit_datetime', '<', end),
-                ])
-                visit_index = count + 1
-            visit_index_str = str(visit_index).zfill(3)
+                visit_index = 1
+                if vals.get('patient_id'):
+                    # hitung kunjungan pasien pada bulan yang sama
+                    start = visit_dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                    end = start + relativedelta(months=1)
+                    count = self.search_count([
+                        ('patient_id', '=', vals['patient_id']),
+                        ('visit_datetime', '>=', start),
+                        ('visit_datetime', '<', end),
+                    ])
+                    visit_index = count + 1
+                visit_index_str = str(visit_index).zfill(3)
 
-            kode_poli = (poli.kode or '').zfill(4)
-            vals['no_reg'] = f"{kode_poli}{ym}{seq}{visit_index_str}"
+                kode_poli = (poli.kode or '').zfill(4)
+                vals['no_reg'] = f"{kode_poli}{ym}{seq}{visit_index_str}"
 
-        return super().create(vals)
+        return super().create(vals_list)
 
     def write(self, vals):
-        """Re-hitung antrian bila dokter/tanggal berubah dan sinkronkan visit_date."""
         for rec in self:
             updates = dict(vals)
 
@@ -421,3 +407,25 @@ class pfn_kunjungan_pasien(models.Model):
 
             super(pfn_kunjungan_pasien, rec).write(updates)
         return True
+
+    def _get_or_create_emr(self):
+        self.ensure_one()
+        emr = self.emr_id
+        if not emr:
+            emr = self.env['emr.record'].create({
+                'kunjungan_id': self.id,
+                # name otomatis ikut no_reg di emr.record (related)
+            })
+            self.emr_id = emr.id
+        return emr
+
+    def action_take_patient(self):
+        """Dipakai dari tombol 'Ambil Pasien' di tree EMR."""
+        for rec in self:
+            if rec.status_pelayanan in ('finished', 'verified'):
+                raise UserError(_('Kunjungan sudah selesai/terverifikasi.'))
+            rec.status_pelayanan = 'in_service'
+            emr = rec._get_or_create_emr()
+            action = self.env.ref('clinic_odoo.emr_record_action').read()[0]
+            action['res_id'] = emr.id
+            return action
