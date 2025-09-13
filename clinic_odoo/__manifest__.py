@@ -22,7 +22,8 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/clinic_security.xml',
+        'security/ir.model.access.csv',
         'data/sequence_unit_pelayanan.xml',
         'data/sequence_kunjungan.xml',
         'data/emr_sequence.xml',
