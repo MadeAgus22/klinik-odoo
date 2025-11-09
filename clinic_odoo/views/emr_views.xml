@@ -55,15 +55,19 @@
               decoration-success="status_pelayanan == 'verified'"
               decoration-warning="status_pelayanan == 'in_service'"
               decoration-muted="status_pelayanan == 'not_served'">
-          <field name="no_reg" string="Nomor Registrasi"/>
-          <field name="patient_id" string="Nama Lengkap"/>
-          <field name="gender" string="Jenis Kelamin"/>
+          <field name="no_rm" string="No. RM"/>
+          <field name="patient_id" string="Pasien"/>
           <field name="umur_display" string="Umur"/>
-          <field name="phone" string="Nomor HP"/>
-          <field name="alamat" string="Alamat"/>
-          <field name="status_pelayanan" string="Status Pelayanan"/>
-          <field name="visit_datetime" string="Tanggal &amp; Jam"/>
-          <button name="action_take_patient" type="object" string="Ambil Pasien" class="oe_highlight"/>
+          <field name="gender" string="Jenis Kelamin"/>
+          <field name="phone" string="No.Tlp"></field>
+          <field name="doctor_id" string="Dokter"/>
+          <field name="visit_datetime" string="Tanggal &amp; Jam Regristrasi"/>
+          <field name="queue_no" string="No. Antrian"/>
+          <button name="action_take_patient"
+                  type="object"
+                  string="Ambil Pasien"
+                  class="oe_highlight"
+                />
         </list>
       </field>
     </record>
@@ -75,11 +79,10 @@
       <field name="name">EMR</field>
       <field name="res_model">pfn.kunjungan.pasien</field>
       <field name="view_mode">list,form</field>
-      <!-- urutan & jenis view yang dipakai HANYA untuk action ini -->
-      <field name="views" eval="[(ref('clinic_odoo.view_emr_kunjungan_list'), 'list'), (False, 'form')]"/>
+      <!-- gunakan view_id agar list view khusus selalu digunakan -->
+      <field name="view_id" ref="clinic_odoo.view_emr_kunjungan_list"/>
       <field name="search_view_id" ref="clinic_odoo.view_emr_kunjungan_search"/>
       <field name="domain">[('status_kunjungan','=','registered')]</field>
-      <field name="context">{}</field>
     </record>
 
 
