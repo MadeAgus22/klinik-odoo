@@ -104,6 +104,16 @@ class emr_record(models.Model):
     rencana_tanggal  = fields.Date(string='Tanggal Rencana')
     rencana_catatan  = fields.Text(string='Catatan Rencana')
 
+    odontogram_id = fields.Many2one(
+        'emr.odontogram', string='Odontogram', ondelete='cascade',
+        help="Relasi ke data Odontogram"
+    )
+    odontogram_data = fields.Text(
+        string='Data Odontogram',
+        related='odontogram_id.odontogram_data',
+        readonly=False, store=True
+    )
+
     _sql_constraints = [
         ('emr_per_visit_unique', 'unique(kunjungan_id)', 'EMR untuk kunjungan ini sudah ada.'),
     ]

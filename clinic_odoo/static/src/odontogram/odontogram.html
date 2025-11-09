@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Odontogram</title>
+<style>
+  :root{
+    --tooth-w:58px; --tooth-h:58px;
+    --gap-x:10px; --gap-row:54px;   /* jarak antar baris */
+    --gap-mid:0px;
+    --font:14px; --label-offset:14px; --canvas-max:1120px;
+  }
+  body{font-family:system-ui,Arial,sans-serif;background:#fff;margin:0;padding:28px}
+  .odo-wrap{max-width:var(--canvas-max);margin:0 auto}
+  .row{display:flex;justify-content:center;gap:var(--gap-x);margin-bottom:var(--gap-row)}
+  .child-block{display:flex;flex-direction:column;align-items:center;gap:var(--gap-mid)}
+  .tooth{width:var(--tooth-w);height:var(--tooth-h);position:relative}
+  .tooth svg{width:100%;height:100%;display:block}
+
+  .idx{position:absolute;pointer-events:none;font-size:var(--font);color:#111;width:100%;left:0;text-align:center;font-weight:700;line-height:1}
+  .label-top{top:calc(-1*var(--label-offset) - var(--font))}
+  .label-bottom{bottom:calc(-1*var(--label-offset) - var(--font))}
+
+  /* Tag teks (UNE/PRE/ANO/NVT) – lebih rendah agar tidak menabrak nomor baris di atas */
+  .top-tag{
+    position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    font-weight:900;font-size:13px;color:#111;line-height:1;display:none;
+    letter-spacing:.5px;text-transform:uppercase;user-select:none
+  }
+
+  /* HANYA garis luar menebal saat ada tag */
+  .tooth.flag svg .frame-outer{ stroke-width:4 }
+  .tooth svg .frame-outer{ stroke:#111; stroke-width:2; fill:none }
+  .tooth svg .frame-inner{ stroke:#111; stroke-width:1.6; fill:none; pointer-events:none }
+  .tooth svg .frame-center{ stroke:#111; stroke-width:1.8; fill:none; pointer-events:none }
+
+  /* ===== Overlay Tanda ===== */
+
+  /* Gigi hilang: abu + X merah besar */
+  .missing{position:absolute;inset:1px;background:#7a7a7acc;border:2px solid #111;display:none;overflow:visible}
+  .missing .line{position:absolute;left:50%;top:50%;width:120%;height:6px;background:#e11d1d;transform-origin:center;border-radius:3px}
+  .missing .l1{transform:translate(-50%,-50%) rotate(45deg)}
+  .missing .l2{transform:translate(-50%,-50%) rotate(-45deg)}
+
+  /* Jembatan: pita horizontal merah full (0px kiri/kanan sesuai permintaan) */
+  .bridge{position:absolute;left:0px;right:0px;top:50%;height:12px;transform:translateY(-50%);
+          background:#e63b3b;display:none;border-radius:6px}
+
+  /* Sisa akar: tanda "V" tebal */
+  .check-layer{position:absolute;inset:0;pointer-events:none}
+  .check-layer svg{position:absolute;inset:0;width:100%;height:100%;display:none;overflow:visible}
+  .check-layer path{stroke:#111;stroke-width:8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  /* area permukaan yang dapat diklik */
+  svg .part{fill:transparent;cursor:pointer}
+  svg .part:hover{fill:#0000000c}
+
+  /* toolbar bawah */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px auto 0;max-width:var(--canvas-max);justify-content:center}
+  .controls .group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .controls .label{font-weight:700;margin-right:6px}
+  .controls button{padding:6px 10px;font-size:13px;border:1px solid #cfcfcf;border-radius:6px;background:#f6f7f9;cursor:pointer}
+  .controls button.active{background:#155ee7;color:#fff;border-color:#155ee7}
+  .controls .danger{border-color:#f4b8b8;background:#fff0f0}
+  .legend{margin-top:8px;text-align:center;font-size:12px;color:#666}
+
+  /* bar kontrol atas */
+  .topbar{max-width:var(--canvas-max);margin:0 auto 28px; /* lebih besar supaya tidak overlap */
+          display:flex;gap:12px;justify-content:center}
+  .topbar button{padding:6px 12px;border:1px solid #cfcfcf;border-radius:6px;background:#f6f7f9;cursor:pointer}
+
+  @media (max-width:960px){
+    :root{--tooth-w:50px;--tooth-h:50px;--gap-x:8px;--font:11px;--gap-row:50px}
+    .top-tag{top:-12px;font-size:12px}
+    .bridge{height:10px}
+    .topbar{margin-bottom:24px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Tombol atas -->
+<div class="topbar">
+  <button id="undo">Undo</button>
+  <button id="redo">Redo</button>
+  <button id="clear-all" class="danger">Hapus Semua</button>
+  <button id="save-odontogram">Simpan Odontogram</button>
+
+</div>
+
+<div class="odo-wrap" id="odontogram"></div>
+
+<!-- Toolbar bawah -->
+<div class="controls" id="controls">
+  <div class="group">
+    <span class="label">Permukaan:</span>
+    <button data-tool="CAR">Karies</button>
+    <button data-tool="FILL-LOG">Tambalan Logam</button>
+    <button data-tool="FILL-NON">Tambalan Non Logam</button>
+    <button data-tool="CROWN-METAL">Mahkota Logam</button>
+    <button data-tool="CROWN-NON">Mahkota Non Logam</button>
+  </div>
+
+  <div class="group">
+    <span class="label">Label atas:</span>
+    <button data-tool="UNE">UNE</button>
+    <button data-tool="PRE">PRE</button>
+    <button data-tool="ANO">ANO</button>
+    <button data-tool="NVT">NVT</button>
+  </div>
+
+  <div class="group">
+    <span class="label">Tanda:</span>
+    <button data-tool="SISA">Sisa Akar</button>
+    <button data-tool="BRIDGE">Jembatan</button>
+    <button data-tool="MISSING">Gigi Hilang</button>
+  </div>
+</div>
+
+<div class="legend">Pilih tool, lalu klik permukaan (untuk warna) atau klik gigi untuk UNE/PRE/ANO/NVT, Sisa Akar (ikon "V"), Jembatan (pita merah penuh), dan Gigi Hilang (abu + X). Undo/Redo & Hapus Semua ada di atas.</div>
+
+<script>
+/* ===== Konstanta ===== */
+const COLORS = {
+  "CAR":"#6e6e6e",
+  "FILL-LOG":"#9b59b6",
+  "FILL-NON":"#2e86c1",
+  "CROWN-METAL":"#ff4d4d",
+  "CROWN-NON":"#04cfd6"
+};
+const topPermanent    = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+const childUpper      = [55,54,53,52,51,61,62,63,64,65];
+const childLower      = [85,84,83,82,81,71,72,73,74,75];
+const bottomPermanent = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+
+/* ===== Mapping anterior vs posterior ===== */
+const anteriorSet = new Set([
+  13,12,11,21,22,23, 33,32,31,41,42,43,
+  53,52,51,61,62,63, 83,82,81,71,72,73
+]);
+const shapeOf = n => (anteriorSet.has(n) ? 'anterior' : 'posterior');
+
+/* ===== SVG Gigi ===== */
+function toothSVG(type='posterior'){
+  const w=58, h=58, pad=2.2;
+  const cx=w/2, cy=h/2;
+
+  // ukuran "blok tengah" standar
+  const rw=w*0.45, rh=h*0.45;
+  const x1=cx-rw/2, x2=cx+rw/2, y1=cy-rh/2, y2=cy+rh/2;
+
+  // BAGIAN PERMUKAAN (5 area klik) – akan disesuaikan untuk anterior/posterior
+  let partsSVG='', frameInnerSVG='', frameCenterSVG='';
+
+  if(type==='anterior'){
+    // trapesium: sisi atas lebih sempit (incisal), sisi bawah lebih lebar (servikal)
+    const tw=rw*0.50, bw=rw*0.50;          // lebar atas & bawah
+    const yTop=cy-rh*0, yBot=cy+rh*0;
+    const xLt=cx-tw/2, xRt=cx+tw/2;
+    const xLb=cx-bw/2, xRb=cx+bw/2;
+
+    // 4 garis dari sudut luar menuju sudut trapesium (seperti versi awal)
+    frameInnerSVG = `
+      <path class="frame-inner" d="M ${pad} ${pad} L ${xLt} ${yTop}" />
+      <path class="frame-inner" d="M ${w-pad} ${pad} L ${xRt} ${yTop}" />
+      <path class="frame-inner" d="M ${pad} ${h-pad} L ${xLb} ${yBot}" />
+      <path class="frame-inner" d="M ${w-pad} ${h-pad} L ${xRb} ${yBot}" />
+    `;
+    frameCenterSVG = `
+      <polygon class="frame-center" points="${xLt},${yTop} ${xRt},${yTop} ${xRb},${yBot} ${xLb},${yBot}" />
+    `;
+
+    // area permukaan klik (tetap 5 bagian)
+    partsSVG = `
+      <polygon class="part" data-part="top"
+        points="${xLt},${yTop} ${xRt},${yTop} ${w-pad},${pad} ${pad},${pad}"/>
+      <polygon class="part" data-part="right"
+        points="${xRt},${yTop} ${xRb},${yBot} ${w-pad},${h-pad} ${w-pad},${pad}"/>
+      <polygon class="part" data-part="bottom"
+        points="${xLb},${yBot} ${xRb},${yBot} ${w-pad},${h-pad} ${pad},${h-pad}"/>
+      <polygon class="part" data-part="left"
+        points="${xLt},${yTop} ${xLb},${yBot} ${pad},${h-pad} ${pad},${pad}"/>
+      <polygon class="part" data-part="center"
+        points="${xLt},${yTop} ${xRt},${yTop} ${xRb},${yBot} ${xLb},${yBot}"/>
+    `;
+  }else{
+    // posterior (persegi tengah + 4 garis)
+    const innerLines=[
+      `M ${pad} ${pad} L ${x1} ${y1}`,
+      `M ${w-pad} ${pad} L ${x2} ${y1}`,
+      `M ${pad} ${h-pad} L ${x1} ${y2}`,
+      `M ${w-pad} ${h-pad} L ${x2} ${y2}`
+    ].join(' ');
+    frameInnerSVG = `<path class="frame-inner" d="${innerLines}"/>`;
+    frameCenterSVG = `<rect class="frame-center" x="${x1}" y="${y1}" width="${rw}" height="${rh}"/>`;
+    partsSVG = `
+      <polygon class="part" data-part="top"
+        points="${x1},${y1} ${x2},${y1} ${w-pad},${pad} ${pad},${pad}"/>
+      <polygon class="part" data-part="right"
+        points="${x2},${y1} ${x2},${y2} ${w-pad},${h-pad} ${w-pad},${pad}"/>
+      <polygon class="part" data-part="bottom"
+        points="${x1},${y2} ${x2},${y2} ${w-pad},${h-pad} ${pad},${h-pad}"/>
+      <polygon class="part" data-part="left"
+        points="${x1},${y1} ${x1},${y2} ${pad},${h-pad} ${pad},${pad}"/>
+      <rect class="part" data-part="center" x="${x1}" y="${y1}" width="${rw}" height="${rh}"/>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 ${w} ${h}" aria-hidden="true">
+      <rect class="frame-outer" x="1" y="1" width="${w-2}" height="${h-2}"/>
+      ${frameInnerSVG}
+      ${frameCenterSVG}
+      ${partsSVG}
+    </svg>`;
+}
+
+/* ===== Render Tooth ===== */
+function makeTooth(n, labelPos){
+  const wrap = document.createElement('div'); wrap.className='tooth'; wrap.dataset.tooth=n;
+  wrap.innerHTML = toothSVG(shapeOf(n));
+
+  const lb = document.createElement('div');
+  lb.className = 'idx ' + (labelPos==='top'?'label-top':'label-bottom');
+  lb.textContent = n;
+  wrap.appendChild(lb);
+
+  const topTag = document.createElement('div'); topTag.className='top-tag'; wrap.appendChild(topTag);
+
+  const missing = document.createElement('div');
+  missing.className='missing';
+  missing.innerHTML = '<div class="line l1"></div><div class="line l2"></div>';
+  wrap.appendChild(missing);
+
+  const bridge  = document.createElement('div'); bridge.className='bridge';  wrap.appendChild(bridge);
+
+  // Sisa akar: tanda "V"
+  const checkLayer = document.createElement('div');
+  checkLayer.className = 'check-layer';
+  checkLayer.innerHTML = `<svg viewBox="0 0 58 58"><path d="M 14 6 L 28 50 L 46 -6"></path></svg>`;
+  wrap.appendChild(checkLayer);
+  const checkSVG = checkLayer.querySelector('svg');
+
+  // klik gigi untuk label/tanda
+  wrap.addEventListener('click', e=>{
+    if (COLORS[currentTool] && e.target.classList.contains('part')) return; // pewarnaan permukaan
+    pushHistory();
+    if (['UNE','PRE','ANO','NVT'].includes(currentTool)){
+      topTag.textContent = currentTool;
+      topTag.style.display = 'block';
+      wrap.classList.add('flag');
+    }else if(currentTool==='SISA'){
+      checkSVG.style.display = (checkSVG.style.display==='block') ? 'none' : 'block';
+    }else if(currentTool==='BRIDGE'){
+      bridge.style.display = (bridge.style.display==='block') ? 'none' : 'block';
+    }else if(currentTool==='MISSING'){
+      missing.style.display = (missing.style.display==='block') ? 'none' : 'block';
+    }
+  });
+
+  // klik permukaan (warna kategori)
+  wrap.querySelectorAll('.part').forEach(p=>{
+    p.addEventListener('click', e=>{
+      const tool=currentTool, el=e.target;
+      if(COLORS[tool]){
+        pushHistory();
+        el.style.fill = COLORS[tool];
+        el.dataset.cat = tool;
+      }
+    });
+  });
+
+  return wrap;
+}
+
+/* ===== Layout ===== */
+function makeRow(arr, labelPos){
+  const row=document.createElement('div'); row.className='row';
+  arr.forEach(n=>row.appendChild(makeTooth(n,labelPos)));
+  return row;
+}
+const root = document.getElementById('odontogram');
+root.appendChild(makeRow(topPermanent,'top'));
+const mid=document.createElement('div'); mid.className='child-block';
+mid.appendChild(makeRow(childUpper,'top'));
+mid.appendChild(makeRow(childLower,'bottom'));
+root.appendChild(mid);
+root.appendChild(makeRow(bottomPermanent,'bottom'));
+
+/* ===== Toolbar ===== */
+let currentTool=null;
+const btns=document.querySelectorAll('#controls button');
+btns.forEach(b=>{
+  b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentTool=b.dataset.tool||null;
+  });
+});
+
+/* ===== Hapus Semua (di topbar) ===== */
+document.getElementById('clear-all').addEventListener('click', ()=>{
+  pushHistory();
+  btns.forEach(x=>x.classList.remove('active'));
+  currentTool=null;
+
+  document.querySelectorAll('.tooth').forEach(t=>{
+    t.querySelectorAll('.part').forEach(p=>{ p.style.fill='transparent'; p.dataset.cat=''; });
+    const tag=t.querySelector('.top-tag'); tag.style.display='none'; tag.textContent='';
+    t.classList.remove('flag');
+    t.querySelector('.missing').style.display='none';
+    t.querySelector('.bridge').style.display='none';
+    t.querySelector('.check-layer svg').style.display='none';
+  });
+});
+
+const params = new URLSearchParams(window.location.search);
+const emrId = params.get('emr_id');  // misal dibaca dari query string
+
+document.getElementById('save-odontogram').addEventListener('click', function () {
+    // Ambil snapshot diagram
+    const state = JSON.stringify(snapshot()); // snapshot() adalah fungsi yang Anda buat sendiri
+
+    // Susun objek payload
+    const payload = {
+        emr_id: emrId,
+        data: state,
+    };
+
+    // Kirim ke endpoint Odoo
+    fetch('/clinic_odoo/save_odontogram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(res => {
+      if (res.success) {
+        alert('Data odontogram berhasil disimpan!');
+      } else {
+        alert('Gagal menyimpan: ' + (res.error || 'Unknown error'));
+      }
+    });
+});
+
+
+
+/* ===== Undo / Redo ===== */
+const undoBtn=document.getElementById('undo');
+const redoBtn=document.getElementById('redo');
+const undoStack=[]; const redoStack=[];
+
+function snapshot(){
+  return Array.from(document.querySelectorAll('.tooth')).map(t=>{
+    const parts = Array.from(t.querySelectorAll('.part')).map(p=>({fill:p.style.fill||'transparent', cat:p.dataset.cat||''}));
+    return {
+      parts,
+      tag: (t.querySelector('.top-tag').textContent||''),
+      tagShown: (t.querySelector('.top-tag').style.display!=='none'),
+      flag: t.classList.contains('flag'),
+      missing: (t.querySelector('.missing').style.display!=='none'),
+      bridge:  (t.querySelector('.bridge').style.display!=='none'),
+      sisa:    (t.querySelector('.check-layer svg').style.display!=='none'),
+    };
+  });
+}
+function applySnapshot(state){
+  const teeth = Array.from(document.querySelectorAll('.tooth'));
+  state.forEach((s, i)=>{
+    const t = teeth[i];
+    const parts = t.querySelectorAll('.part');
+    s.parts.forEach((p, idx)=>{ parts[idx].style.fill=p.fill; parts[idx].dataset.cat=p.cat; });
+    const tag=t.querySelector('.top-tag'); tag.textContent=s.tag; tag.style.display=s.tagShown?'block':'none';
+    t.classList.toggle('flag', s.flag);
+    t.querySelector('.missing').style.display = s.missing?'block':'none';
+    t.querySelector('.bridge').style.display  = s.bridge ?'block':'none';
+    t.querySelector('.check-layer svg').style.display = s.sisa?'block':'none';
+  });
+}
+function pushHistory(){ undoStack.push(snapshot()); redoStack.length=0; }
+undoBtn.addEventListener('click', ()=>{
+  if(!undoStack.length) return;
+  const cur = snapshot();
+  redoStack.push(cur);
+  const prev = undoStack.pop();
+  applySnapshot(prev);
+});
+redoBtn.addEventListener('click', ()=>{
+  if(!redoStack.length) return;
+  const cur = snapshot();
+  undoStack.push(cur);
+  const next = redoStack.pop();
+  applySnapshot(next);
+});
+</script>
+</body>
+</html>
+
+

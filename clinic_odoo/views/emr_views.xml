@@ -189,6 +189,14 @@
                   </group>
                 </group>
               </page>
+
+              <page string="Odontogram">
+                <div>
+                  <iframe src="/clinic_odoo/static/src/odontogram/odontogram.html?emr_id={{ id }}"
+                          style="width:100%; height:700px; border:none;">
+                  </iframe>
+                </div>
+              </page>
             </notebook>
           </sheet>
         </form>
