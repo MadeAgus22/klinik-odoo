@@ -97,11 +97,12 @@ class emr_procedure_line(models.Model):
     tindakan_id = fields.Many2one(
         'product.product', 
         string='Tindakan', 
-        required=True,
-        # Domain kosong di sini, kita atur ketat di XML
+        required=True
     )
-    tindakan_code = fields.Char(related='tindakan_id.default_code', string='Kode', store=True, readonly=True)
-    tindakan_name = fields.Char(related='tindakan_id.name', string='Nama', store=True, readonly=True)
+    
+    # FIX: Ubah store=True menjadi store=False untuk menghindari konflik tipe JSONB/VARCHAR
+    tindakan_code = fields.Char(related='tindakan_id.default_code', string='Kode', store=False, readonly=True)
+    tindakan_name = fields.Char(related='tindakan_id.name', string='Nama', store=False, readonly=True)
 
     @api.depends('service_type_id')
     def _compute_allowed_categories(self):
@@ -136,10 +137,11 @@ class emr_prescription_line(models.Model):
     obat_id  = fields.Many2one(
         'product.product', 
         string='Obat', 
-        required=True,
-        # Domain kosong di sini, kita atur ketat di XML
+        required=True
     )
-    obat_name = fields.Char(related='obat_id.name', string='Nama Obat', store=True, readonly=True)
+    
+    # FIX: Ubah store=True menjadi store=False
+    obat_name = fields.Char(related='obat_id.name', string='Nama Obat', store=False, readonly=True)
     note     = fields.Char(string='Catatan')
 
     @api.depends('service_type_id')
