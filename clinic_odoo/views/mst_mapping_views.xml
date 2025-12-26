@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_clinic_mapping_obat_list" model="ir.ui.view">
+            <field name="name">clinic.mapping.obat.list</field>
+            <field name="model">clinic.mapping.obat</field>
+            <field name="arch" type="xml">
+                <list string="Mapping Kategori Obat" editable="bottom">
+                    <field name="service_type_id"/>
+                    <field name="product_category_id"/>
+                    <field name="description"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_clinic_mapping_obat_search" model="ir.ui.view">
+            <field name="name">clinic.mapping.obat.search</field>
+            <field name="model">clinic.mapping.obat</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="service_type_id"/>
+                    <field name="product_category_id"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Jenis Pelayanan" name="group_service" context="{'group_by': 'service_type_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_mapping_obat" model="ir.actions.act_window">
+            <field name="name">Mapping Kategori Obat</field>
+            <field name="res_model">clinic.mapping.obat</field>
+            <field name="view_mode">list</field>
+            <field name="context">{'search_default_group_service': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Tentukan kategori produk obat untuk setiap Jenis Pelayanan.
+                </p>
+            </field>
+        </record>
+
+        <record id="view_clinic_mapping_produk_list" model="ir.ui.view">
+            <field name="name">clinic.mapping.produk.list</field>
+            <field name="model">clinic.mapping.produk</field>
+            <field name="arch" type="xml">
+                <list string="Mapping Produk per Layanan" editable="bottom">
+                    <field name="service_type_id"/>
+                    <field name="product_category_id"/>
+                    <field name="description"/>
+                </list>
+            </field>
+        </record>
+        
+        <record id="view_clinic_mapping_produk_search" model="ir.ui.view">
+            <field name="name">clinic.mapping.produk.search</field>
+            <field name="model">clinic.mapping.produk</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="service_type_id"/>
+                    <field name="product_category_id"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Jenis Pelayanan" name="group_service" context="{'group_by': 'service_type_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_clinic_mapping_produk" model="ir.actions.act_window">
+            <field name="name">Mapping Produk Layanan</field>
+            <field name="res_model">clinic.mapping.produk</field>
+            <field name="view_mode">list</field>
+            <field name="context">{'search_default_group_service': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Hubungkan Jenis Pelayanan dengan Kategori Produk Inventory.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_clinic_configuration"
+                  name="Konfigurasi Mapping"
+                  parent="clinic_odoo.menu_bar_clinic"
+                  sequence="90"/>
+
+        <menuitem id="menu_mapping_obat"
+                  name="Mapping Obat/Alkes EMR"
+                  parent="menu_clinic_configuration"
+                  action="action_clinic_mapping_obat"
+                  sequence="10"/>
+
+        <menuitem id="menu_mapping_produk"
+                  name="Mapping Prosedur EMR"
+                  parent="menu_clinic_configuration"
+                  action="action_clinic_mapping_produk"
+                  sequence="20"/>
+
+    </data>
+</odoo>

@@ -79,187 +79,7 @@ class mst_kelas_tarif(models.Model):
         for rec in self:
             rec.active = not rec.active
 
-# --- MASTER PRODUK: TINDAKAN ---
-class mst_produk_tindakan(models.Model):
-    _name = 'mst.produk.tindakan'
-    _description = 'Master Produk - Tindakan'
-    _rec_name = 'name'
 
-    kode = fields.Char(string='Kode', required=True)
-    name = fields.Char(string='Nama Tindakan', required=True)
-    description = fields.Text(string='Catatan')
-    active = fields.Boolean(string='Status', default=True)
-
-    tarif_ids = fields.One2many('mst.tarif.tindakan', 'produk_id', string='Tarif')
-    
-    _sql_constraints = [
-        ('kode_tindakan_unique', 'unique(kode)', 'Kode Tindakan harus unik!'),
-    ]
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
-
-
-# --- MASTER PRODUK: OBAT ---
-class mst_produk_obat(models.Model):
-    _name = 'mst.produk.obat'
-    _description = 'Master Produk - Obat'
-    _rec_name = 'name'
-
-    kode = fields.Char(string='Kode', required=True)
-    name = fields.Char(string='Nama Obat', required=True)
-    description = fields.Text(string='Catatan')
-    active = fields.Boolean(string='Status', default=True)
-    tarif_ids = fields.One2many('mst.tarif.obat', 'produk_id', string='Tarif Obat')
-
-    _sql_constraints = [
-        ('kode_obat_unique', 'unique(kode)', 'Kode Obat harus unik!'),
-    ]
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
-
-
-# --- MASTER PRODUK: ALAT KESEHATAN ---
-class mst_produk_alatkesehatan(models.Model):
-    _name = 'mst.produk.alatkesehatan'
-    _description = 'Master Produk - Alat Kesehatan'
-    _rec_name = 'name'
-
-    kode = fields.Char(string='Kode', required=True)
-    name = fields.Char(string='Nama Alat', required=True)
-    description = fields.Text(string='Catatan')
-    active = fields.Boolean(string='Status', default=True)
-    tarif_ids = fields.One2many('mst.tarif.alatkesehatan', 'produk_id', string='Tarif Alat Kesehatan')
-
-    _sql_constraints = [
-        ('kode_alat_unique', 'unique(kode)', 'Kode Alat harus unik!'),
-    ]
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
-
-class mst_tarif_tindakan(models.Model):
-    _name = 'mst.tarif.tindakan'
-    _description = 'Master Tarif Tindakan'
-    _rec_name = 'kode'
-
-    kode = fields.Char(string='Kode Tarif', required=True)
-    produk_id = fields.Many2one('mst.produk.tindakan', string='Nama Produk', required=True, ondelete='restrict')
-    kelas_id  = fields.Many2one('mst.kelas.tarif', string='Kelas', required=True, ondelete='restrict')
-
-    currency_id = fields.Many2one('res.currency', string='Mata Uang',
-                                  default=lambda self: self.env.company.currency_id.id, required=True)
-
-    jasa_klinik   = fields.Monetary(string='Jasa Klinik', default=0.0, currency_field='currency_id')
-    jasa_admin    = fields.Monetary(string='Jasa Admin', default=0.0, currency_field='currency_id')
-    jasa_operator = fields.Monetary(string='Jasa Operator', default=0.0, currency_field='currency_id')
-    jasa_lainnya  = fields.Monetary(string='Jasa Lainnya', default=0.0, currency_field='currency_id')
-
-    total_tarif = fields.Monetary(string='Total Tarif', compute='_compute_total_tarif',
-                                  store=True, currency_field='currency_id')
-
-    date_start = fields.Date(string='Tanggal Awal')
-    date_end   = fields.Date(string='Tanggal Akhir')
-    active     = fields.Boolean(string='Aktif', default=True)
-    description = fields.Text(string='Catatan')
-
-    _sql_constraints = [
-        ('kode_tarif_tindakan_unique', 'unique(kode)', 'Kode Tarif harus unik!'),
-    ]
-
-    @api.depends('jasa_klinik', 'jasa_admin', 'jasa_operator', 'jasa_lainnya')
-    def _compute_total_tarif(self):
-        for rec in self:
-            rec.total_tarif = (rec.jasa_klinik or 0.0) + (rec.jasa_admin or 0.0) + (rec.jasa_operator or 0.0) + (rec.jasa_lainnya or 0.0)
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
-
-class mst_tarif_obat(models.Model):
-    _name = 'mst.tarif.obat'
-    _description = 'Master Tarif Obat'
-    _rec_name = 'kode'
-
-    kode = fields.Char(string='Kode Tarif', required=True)
-    produk_id = fields.Many2one('mst.produk.obat', string='Nama Produk', required=True, ondelete='restrict')
-    kelas_id  = fields.Many2one('mst.kelas.tarif', string='Kelas', required=True, ondelete='restrict')
-
-    currency_id = fields.Many2one(
-        'res.currency', string='Mata Uang',
-        default=lambda self: self.env.company.currency_id.id, required=True)
-
-    # Komponen tarif (samakan dengan tindakan sesuai permintaan)
-    jasa_klinik   = fields.Monetary(string='Jasa Klinik',  default=0.0, currency_field='currency_id')
-    jasa_admin    = fields.Monetary(string='Jasa Admin',   default=0.0, currency_field='currency_id')
-    jasa_operator = fields.Monetary(string='Jasa Operator',default=0.0, currency_field='currency_id')
-    jasa_lainnya  = fields.Monetary(string='Jasa Lainnya', default=0.0, currency_field='currency_id')
-
-    total_tarif = fields.Monetary(
-        string='Total Tarif', compute='_compute_total_tarif', store=True,
-        currency_field='currency_id')
-
-    date_start = fields.Date(string='Tanggal Awal')
-    date_end   = fields.Date(string='Tanggal Akhir')
-    active     = fields.Boolean(string='Aktif', default=True)
-    description = fields.Text(string='Catatan')
-
-    _sql_constraints = [
-        ('kode_tarif_obat_unique', 'unique(kode)', 'Kode Tarif harus unik!'),
-    ]
-
-    @api.depends('jasa_klinik', 'jasa_admin', 'jasa_operator', 'jasa_lainnya')
-    def _compute_total_tarif(self):
-        for rec in self:
-            rec.total_tarif = (rec.jasa_klinik or 0.0) + (rec.jasa_admin or 0.0) + (rec.jasa_operator or 0.0) + (rec.jasa_lainnya or 0.0)
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
-
-class mst_tarif_alatkesehatan(models.Model):
-    _name = 'mst.tarif.alatkesehatan'
-    _description = 'Master Tarif Alat Kesehatan'
-    _rec_name = 'kode'
-
-    kode = fields.Char(string='Kode Tarif', required=True)
-    produk_id = fields.Many2one('mst.produk.alatkesehatan', string='Nama Produk', required=True, ondelete='restrict')
-    kelas_id  = fields.Many2one('mst.kelas.tarif', string='Kelas', required=True, ondelete='restrict')
-
-    currency_id = fields.Many2one(
-        'res.currency', string='Mata Uang',
-        default=lambda self: self.env.company.currency_id.id, required=True)
-
-    jasa_klinik   = fields.Monetary(string='Jasa Klinik',   default=0.0, currency_field='currency_id')
-    jasa_admin    = fields.Monetary(string='Jasa Admin',    default=0.0, currency_field='currency_id')
-    jasa_operator = fields.Monetary(string='Jasa Operator', default=0.0, currency_field='currency_id')
-    jasa_lainnya  = fields.Monetary(string='Jasa Lainnya',  default=0.0, currency_field='currency_id')
-
-    total_tarif = fields.Monetary(
-        string='Total Tarif', compute='_compute_total_tarif', store=True,
-        currency_field='currency_id')
-
-    date_start = fields.Date(string='Tanggal Awal')
-    date_end   = fields.Date(string='Tanggal Akhir')
-    active     = fields.Boolean(string='Aktif', default=True)
-    description = fields.Text(string='Catatan')
-
-    _sql_constraints = [
-        ('kode_tarif_alatkesehatan_unique', 'unique(kode)', 'Kode Tarif harus unik!'),
-    ]
-
-    @api.depends('jasa_klinik', 'jasa_admin', 'jasa_operator', 'jasa_lainnya')
-    def _compute_total_tarif(self):
-        for rec in self:
-            rec.total_tarif = (rec.jasa_klinik or 0.0) + (rec.jasa_admin or 0.0) + (rec.jasa_operator or 0.0) + (rec.jasa_lainnya or 0.0)
-
-    def action_toggle_active(self):
-        for rec in self:
-            rec.active = not rec.active
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -349,5 +169,78 @@ class mst_unit_pelayanan_dokter(models.Model):
         for rec in self:
             part = rec.divisi_id.name or rec.poli_id.name or rec.service_type_id.name or '-'
             name = f"{rec.employee_id.name} - {part}"
+            res.append((rec.id, name))
+        return res
+
+# ==============================================================================
+# MAPPING PRODUK & OBAT (FINAL)
+# ==============================================================================
+
+class ClinicMappingObat(models.Model):
+    _name = 'clinic.mapping.obat'
+    _description = 'Mapping Kategori Obat EMR'
+    _rec_name = 'service_type_id'  # Ubah rec_name agar lebih informatif
+
+    service_type_id = fields.Many2one(
+        'mst.service.types', 
+        string='Jenis Pelayanan', 
+        required=True,
+        ondelete='cascade'
+    )
+    product_category_id = fields.Many2one(
+        'product.category', 
+        string='Kategori Produk (Inventory)', 
+        required=True,
+        ondelete='cascade',
+        help="Semua produk dalam kategori ini akan muncul sebagai 'Obat' di EMR pada pelayanan tersebut"
+    )
+    description = fields.Text(string='Keterangan')
+    
+    # Constraint diupdate: Unik berdasarkan PASANGAN (Layanan + Kategori)
+    _sql_constraints = [
+        ('mapping_obat_unique', 'unique(service_type_id, product_category_id)', 'Kategori produk ini sudah terdaftar untuk pelayanan tersebut!'),
+    ]
+
+    def name_get(self):
+        res = []
+        for rec in self:
+            srv_name = rec.service_type_id.name or '?'
+            cat_name = rec.product_category_id.name or '?'
+            name = f"{srv_name} -> {cat_name}"
+            res.append((rec.id, name))
+        return res
+
+class ClinicMappingProduk(models.Model):
+    _name = 'clinic.mapping.produk'
+    _description = 'Mapping Kategori Produk per Layanan'
+    _rec_name = 'service_type_id'
+
+    service_type_id = fields.Many2one(
+        'mst.service.types', 
+        string='Jenis Pelayanan', 
+        required=True,
+        ondelete='cascade'
+    )
+    product_category_id = fields.Many2one(
+        'product.category', 
+        string='Kategori Produk (Inventory)', 
+        required=True,
+        ondelete='cascade',
+        help="Produk dalam kategori ini akan muncul saat layanan ini dipilih di EMR"
+    )
+    description = fields.Text(string='Keterangan')
+
+    # --- UPGRADE: Mencegah duplikasi pasangan Layanan + Kategori ---
+    _sql_constraints = [
+        ('mapping_produk_unique', 'unique(service_type_id, product_category_id)', 'Kategori produk ini sudah dipetakan untuk layanan tersebut!'),
+    ]
+
+    def name_get(self):
+        res = []
+        for rec in self:
+            # Gunakan .name atau string kosong jika belum diset
+            srv_name = rec.service_type_id.name or '?'
+            cat_name = rec.product_category_id.name or '?'
+            name = f"{srv_name} -> {cat_name}"
             res.append((rec.id, name))
         return res
