@@ -61,6 +61,27 @@ class emr_record(models.Model):
     odontogram_id = fields.Many2one('emr.odontogram', string='Odontogram', ondelete='cascade')
     odontogram_data = fields.Text(string='Data Odontogram', related='odontogram_id.odontogram_data', readonly=False, store=True)
 
+    odontogram_frame = fields.Html(
+        string='Odontogram', 
+        compute='_compute_odontogram_frame', 
+        sanitize=False # PENTING: agar iframe tidak dihapus oleh security Odoo
+    )
+
+   
+    def _compute_odontogram_frame(self):
+        for rec in self:
+            if rec.id:
+                # Masukkan ID dinamis ke dalam URL
+                url = f"/clinic_odoo/static/src/odontogram/odontogram.html?emr_id={rec.id}"
+                rec.odontogram_frame = f"""
+                    <iframe src="{url}" 
+                            style="width:100%; height:800px; border:none;">
+                    </iframe>
+                """
+            else:
+                # Jika record belum disimpan (New), tampilkan pesan
+                rec.odontogram_frame = "<div class='alert alert-info'>Silakan simpan data terlebih dahulu untuk membuka Odontogram.</div>"
+
     _sql_constraints = [
         ('emr_per_visit_unique', 'unique(kunjungan_id)', 'EMR untuk kunjungan ini sudah ada.'),
     ]
