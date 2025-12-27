@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.module.category" id="module_category_clinic">
+            <field name="name">Manajemen Klinik</field>
+            <field name="description">Level akses untuk aplikasi Klinik.</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="group_clinic_user" model="res.groups">
+            <field name="name">User (Staf/Ners)</field>
+            <field name="category_id" ref="module_category_clinic"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="group_clinic_doctor" model="res.groups">
+            <field name="name">Dokter</field>
+            <field name="category_id" ref="module_category_clinic"/>
+            <field name="implied_ids" eval="[(4, ref('group_clinic_user'))]"/>
+        </record>
+
+        <record id="group_clinic_manager" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="module_category_clinic"/>
+            <field name="implied_ids" eval="[(4, ref('group_clinic_doctor'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+    </data>
+</odoo>
