@@ -1,0 +1,60 @@
+:root {
+    --tooth-w: 58px; --tooth-h: 58px;
+    --gap-x: 10px; --gap-row: 54px;
+    --gap-mid: 0px;
+    --font: 14px; --label-offset: 14px; --canvas-max: 1120px;
+}
+body { font-family: system-ui, Arial, sans-serif; background: #fff; margin: 0; padding: 28px; }
+.odo-wrap { max-width: var(--canvas-max); margin: 0 auto; }
+.row { display: flex; justify-content: center; gap: var(--gap-x); margin-bottom: var(--gap-row); }
+.child-block { display: flex; flex-direction: column; align-items: center; gap: var(--gap-mid); }
+.tooth { width: var(--tooth-w); height: var(--tooth-h); position: relative; }
+.tooth svg { width: 100%; height: 100%; display: block; }
+
+.idx { position: absolute; pointer-events: none; font-size: var(--font); color: #111; width: 100%; left: 0; text-align: center; font-weight: 700; line-height: 1; }
+.label-top { top: calc(-1*var(--label-offset) - var(--font)); }
+.label-bottom { bottom: calc(-1*var(--label-offset) - var(--font)); }
+
+.top-tag {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    font-weight: 900; font-size: 13px; color: #111; line-height: 1; display: none;
+    letter-spacing: .5px; text-transform: uppercase; user-select: none;
+}
+
+.tooth.flag svg .frame-outer { stroke-width: 4; }
+.tooth svg .frame-outer { stroke: #111; stroke-width: 2; fill: none; }
+.tooth svg .frame-inner { stroke: #111; stroke-width: 1.6; fill: none; pointer-events: none; }
+.tooth svg .frame-center { stroke: #111; stroke-width: 1.8; fill: none; pointer-events: none; }
+
+.missing { position: absolute; inset: 1px; background: #7a7a7acc; border: 2px solid #111; display: none; overflow: visible; }
+.missing .line { position: absolute; left: 50%; top: 50%; width: 120%; height: 6px; background: #e11d1d; transform-origin: center; border-radius: 3px; }
+.missing .l1 { transform: translate(-50%, -50%) rotate(45deg); }
+.missing .l2 { transform: translate(-50%, -50%) rotate(-45deg); }
+
+.bridge { position: absolute; left: 0px; right: 0px; top: 50%; height: 12px; transform: translateY(-50%); background: #e63b3b; display: none; border-radius: 6px; }
+
+.check-layer { position: absolute; inset: 0; pointer-events: none; }
+.check-layer svg { position: absolute; inset: 0; width: 100%; height: 100%; display: none; overflow: visible; }
+.check-layer path { stroke: #111; stroke-width: 8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+svg .part { fill: transparent; cursor: pointer; }
+svg .part:hover { fill: #0000000c; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px auto 0; max-width: var(--canvas-max); justify-content: center; }
+.controls .group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.controls .label { font-weight: 700; margin-right: 6px; }
+.controls button { padding: 6px 10px; font-size: 13px; border: 1px solid #cfcfcf; border-radius: 6px; background: #f6f7f9; cursor: pointer; }
+.controls button.active { background: #155ee7; color: #fff; border-color: #155ee7; }
+.controls .danger { border-color: #f4b8b8; background: #fff0f0; }
+.controls .primary { border-color: #155ee7; background: #e3efff; color: #0f47b3; font-weight: bold; }
+.legend { margin-top: 8px; text-align: center; font-size: 12px; color: #666; }
+
+.topbar { max-width: var(--canvas-max); margin: 0 auto 28px; display: flex; gap: 12px; justify-content: center; }
+.topbar button { padding: 6px 12px; border: 1px solid #cfcfcf; border-radius: 6px; background: #f6f7f9; cursor: pointer; }
+
+@media (max-width: 960px) {
+    :root { --tooth-w: 50px; --tooth-h: 50px; --gap-x: 8px; --font: 11px; --gap-row: 50px; }
+    .top-tag { top: -12px; font-size: 12px; }
+    .bridge { height: 10px; }
+    .topbar { margin-bottom: 24px; }
+}
