@@ -1,18 +1,10 @@
-# -*- coding: utf-8 -*-
-from odoo import models, fields, api, _
+# clinic_odoo/models/emr_odontogram_models.py
+from odoo import models, fields
 
 class EmrOdontogram(models.Model):
     _name = 'emr.odontogram'
-    _description = 'EMR Odontogram'
+    _description = 'Data Odontogram'
 
-    emr_id = fields.Many2one(
-        'emr.record', string='EMR', required=True, ondelete='cascade',
-        help='Relasi ke EMR Record (kunjungan pasien).')
-    odontogram_data = fields.Text(
-        string='Data Odontogram',
-        help='JSON atau string hasil input odontogram (colours, tag, missing, dsb.).')
-
-    _sql_constraints = [
-        ('emr_unique', 'unique(emr_id)',
-         'Satu EMR hanya boleh memiliki satu odontogram.')
-    ]
+    name = fields.Char(string='Nama', default='Odontogram')
+    # Data JSON disimpan sebagai teks panjang
+    odontogram_data = fields.Text(string='Data JSON')
