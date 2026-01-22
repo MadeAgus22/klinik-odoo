@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_mst_sesi_pelayanan_list" model="ir.ui.view">
+            <field name="name">mst.sesi.pelayanan.list</field>
+            <field name="model">mst.sesi.pelayanan</field>
+            <field name="arch" type="xml">
+                <list string="Sesi Pelayanan">
+                    <field name="name"/>
+                    <field name="jam_awal_display" string="Mulai"/>
+                    <field name="jam_akhir_display" string="Selesai"/>
+                    <field name="catatan"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_mst_sesi_pelayanan_form" model="ir.ui.view">
+            <field name="name">mst.sesi.pelayanan.form</field>
+            <field name="model">mst.sesi.pelayanan</field>
+            <field name="arch" type="xml">
+                <form string="Sesi Pelayanan">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" placeholder="Contoh: Shift Pagi"/>
+                            </group>
+                            <group>
+                                <field name="catatan" placeholder="Keterangan shift..."/>
+                            </group>
+                        </group>
+
+                        <group string="Jadwal Waktu">
+                            <label for="awal_jam" string="Jam Mulai"/>
+                            <div class="o_row">
+                                <field name="awal_jam" style="width: 70px !important;"/>
+                                <span class="o_form_label">:</span>
+                                <field name="awal_menit" style="width: 70px !important;"/>
+                            </div>
+
+                            <label for="akhir_jam" string="Jam Selesai"/>
+                            <div class="o_row">
+                                <field name="akhir_jam" style="width: 70px !important;"/>
+                                <span class="o_form_label">:</span>
+                                <field name="akhir_menit" style="width: 70px !important;"/>
+                            </div>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_mst_sesi_pelayanan" model="ir.actions.act_window">
+            <field name="name">Sesi Pelayanan</field>
+            <field name="res_model">mst.sesi.pelayanan</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Buat jadwal sesi pelayanan baru.
+              </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_mst_sesi_pelayanan"
+                  name="Master Sesi Pelayanan"
+                  parent="clinic_odoo.menu_bar_clinic"
+                  action="action_mst_sesi_pelayanan"
+                  sequence="60"/>
+
+    </data>
+</odoo>

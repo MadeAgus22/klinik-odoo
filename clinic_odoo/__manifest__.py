@@ -9,10 +9,10 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
     """,
 
     'author': "Toni Saputra",
-    'website': "https://absensi-lovat-seven.vercel.app/",
+    'website': "https://pranoova.com",
 
     # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
+
     # for the full list
     'category': 'Healthcare',
     'version': '0.01',
@@ -38,6 +38,7 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         'views/pfn_data_pasien_views.xml',
         'views/pfn_kunjungan_views.xml',
         'views/emr_views.xml',
+        'views/mst_sesi_pelayanan_views.xml',
 
 
     ],

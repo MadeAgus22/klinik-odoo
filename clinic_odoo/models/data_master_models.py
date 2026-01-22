@@ -244,3 +244,36 @@ class ClinicMappingProduk(models.Model):
             name = f"{srv_name} -> {cat_name}"
             res.append((rec.id, name))
         return res
+    
+#==============================================================================
+class MstSesiPelayanan(models.Model):
+    _name = 'mst.sesi.pelayanan'
+    _description = 'Master Sesi Pelayanan'
+    _rec_name = 'name'
+
+    # Buat daftar pilihan Jam (00-23) dan Menit (00-59)
+    # zfill(2) membuat angka 1 menjadi '01'
+    SELECTION_JAM = [(str(i).zfill(2), str(i).zfill(2)) for i in range(24)]
+    SELECTION_MENIT = [(str(i).zfill(2), str(i).zfill(2)) for i in range(60)]
+
+    name = fields.Char(string='Nama Sesi', required=True)
+    
+    # Jam Awal (Dipisah)
+    awal_jam = fields.Selection(SELECTION_JAM, string='Jam Awal', required=True, default='08')
+    awal_menit = fields.Selection(SELECTION_MENIT, string='Menit Awal', required=True, default='00')
+
+    # Jam Akhir (Dipisah)
+    akhir_jam = fields.Selection(SELECTION_JAM, string='Jam Akhir', required=True, default='16')
+    akhir_menit = fields.Selection(SELECTION_MENIT, string='Menit Akhir', required=True, default='00')
+
+    catatan = fields.Text(string='Catatan')
+
+    # Field Compute: Menggabungkan Jam & Menit untuk tampilan di List View
+    jam_awal_display = fields.Char(string='Waktu Mulai', compute='_compute_waktu_display')
+    jam_akhir_display = fields.Char(string='Waktu Selesai', compute='_compute_waktu_display')
+
+    @api.depends('awal_jam', 'awal_menit', 'akhir_jam', 'akhir_menit')
+    def _compute_waktu_display(self):
+        for rec in self:
+            rec.jam_awal_display = f"{rec.awal_jam}:{rec.awal_menit}" if rec.awal_jam and rec.awal_menit else ""
+            rec.jam_akhir_display = f"{rec.akhir_jam}:{rec.akhir_menit}" if rec.akhir_jam and rec.akhir_menit else ""
