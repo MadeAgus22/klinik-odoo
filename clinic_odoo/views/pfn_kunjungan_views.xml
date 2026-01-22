@@ -38,7 +38,7 @@
                 <!-- Gunakan M2O pasien. Matikan quick-create agar buka form penuh -->
                 <field name="patient_id"
                        placeholder="Ketik nama/No. RM untuk mencari atau buat pasien baru"
-                       options="{'no_quick_create': True, 'no_create_edit': False}"/>
+                       options="{'no_quick_create': True, 'no_create_edit': False}" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
                 <field name="no_rm" readonly="1"/>
                 <field name="name" readonly="1"/>
                 <field name="no_identitas" readonly="1"/>
@@ -58,20 +58,20 @@
 
               <group string="Data Registrasi">
                 <field name="no_reg" readonly="1"/>
-                <field name="service_type_id"/>
-                <field name="poli_id"/>
-                <field name="divisi_id"/>
-                <field name="visit_datetime"/>
+                <field name="service_type_id" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="poli_id" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="divisi_id" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="visit_datetime" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
                 <!-- domain ini redundant (sudah ada di field), tapi aman untuk dibiarkan -->
                 <field name="doctor_id" string="Dokter"
-                       domain="[('id','in', available_doctor_ids)]"/>
+                       domain="[('id','in', available_doctor_ids)]" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
                 <field name="queue_no" readonly="1"/>
               </group>
             </group>
 
             <group string="Status">
-              <field name="status_kunjungan"/>
-              <field name="status_pelayanan"/>
+              <field name="status_kunjungan" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+              <field name="status_pelayanan" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
             </group>
           </sheet>
         </form>

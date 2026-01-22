@@ -29,18 +29,18 @@
           <sheet>
             <group>
               <group>
-                <field name="no_rm" readonly="1"/>
-                <field name="name"/>
-                <field name="no_identitas"/>
-                <field name="tempat_lahir"/>
-                <field name="tanggal_lahir"/>
-                <field name="umur_display" readonly="1"/>
+                <field name="no_rm" readonly="1" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="name" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="no_identitas" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="tempat_lahir" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="tanggal_lahir" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="umur_display" readonly="1" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
               </group>
               <group>
                 <field name="gender" widget="radio"/>
-                <field name="alamat"/>
-                <field name="phone"/>
-                <field name="email" widget="email"/>
+                <field name="alamat" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="phone" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
+                <field name="email" widget="email" style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px;"/>
                 <field name="active"/>
               </group>
             </group>
