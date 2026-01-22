@@ -96,16 +96,27 @@
               <page string="SOAP">
                 <group>
                   <group string="Subyektif">
-                    <field name="subj_keluhan"/>
-                    <field name="subj_riwayat_peny"/>
-                    <field name="subj_riwayat_alergi"/>
+                    <field name="subj_keluhan"
+                          placeholder="Masukkan data subyektif pasien di sini..."
+                          style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
+                    <field name="subj_riwayat_peny" 
+                    placeholder="Masukkan riwayat penyakit pasien di sini..."
+                           style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
+                    <field name="subj_riwayat_alergi" 
+                           placeholder="Masukkan riwayat alergi pasien di sini..."
+                           style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
                   </group>
                   <group string="Obyektif">
-                    <field name="obj_td_sistol"/>
-                    <field name="obj_td_diastol"/>
-                    <field name="obj_nadi"/>
-                    <field name="obj_suhu"/>
-                    <field name="obj_pemeriksaan_fisik"/>
+                    <field name="obj_td_sistol"
+                            style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px; width: 60px; text-align: center;"/>
+                    <field name="obj_td_diastol"
+                            style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px; width: 60px; text-align: center;"/>
+                    <field name="obj_nadi"
+                            style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px; width: 60px; text-align: center;"/>
+                    <field name="obj_suhu"
+                            style="border: 1px solid #d4c4c4; padding: 5px; border-radius: 4px; width: 60px; text-align: center;"/>   
+                    <field name="obj_pemeriksaan_fisik"
+                            style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
                   </group>
                 </group>
 
@@ -117,7 +128,9 @@
                       <field name="icd10_code"/>
                     </list>
                   </field>
-                  <field name="prognosis"/>
+                  <field name="prognosis"
+                          placeholder="Pilih prognosis pasien di sini..."
+                          style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
                 </group>
 
                 <group string="Plan">
@@ -155,10 +168,14 @@
                     </field>
                   </group>
                   <group>
-                    <field name="edukasi"/>
-                    <field name="rencana_tindakan"/>
-                    <field name="rencana_tanggal"/>
-                    <field name="rencana_catatan"/>
+                    <field name="edukasi"
+                           style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
+                    <field name="rencana_tindakan"
+                            style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
+                    <field name="rencana_tanggal"
+                            style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
+                    <field name="rencana_catatan"
+                            style="border: 1px solid #d4c4c4; padding: 10px; border-radius: 5px; background-color: #fcfcfc; min-height: 50px;"/>
                   </group>
                 </group>
               </page>
