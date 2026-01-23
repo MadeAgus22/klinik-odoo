@@ -172,6 +172,23 @@ class mst_unit_pelayanan_dokter(models.Model):
             res.append((rec.id, name))
         return res
 
+    def action_open_schedule(self):
+        self.ensure_one()
+        return {
+            'name': f"Jadwal: {self.employee_id.name}",
+            'type': 'ir.actions.act_window',
+            'res_model': 'set.doctors.schedule',
+            'view_mode': 'calendar,list,form',
+            # DOMAIN: Filter agar kalender hanya memunculkan data dokter ini
+            'domain': [('doctor_id', '=', self.employee_id.id)],
+            # CONTEXT: Default value saat user membuat jadwal baru (klik tanggal)
+            'context': {
+                'default_doctor_id': self.employee_id.id,
+                # Kita HAPUS 'search_default_...' yang bikin error. 
+                # Domain di atas sudah cukup untuk memfilter data.
+            },
+        }
+
 # ==============================================================================
 # MAPPING PRODUK & OBAT (FINAL)
 # ==============================================================================
@@ -277,3 +294,14 @@ class MstSesiPelayanan(models.Model):
         for rec in self:
             rec.jam_awal_display = f"{rec.awal_jam}:{rec.awal_menit}" if rec.awal_jam and rec.awal_menit else ""
             rec.jam_akhir_display = f"{rec.akhir_jam}:{rec.akhir_menit}" if rec.akhir_jam and rec.akhir_menit else ""
+    
+    def _compute_display_name(self):
+        for rec in self:
+            # Format jam agar selalu 2 digit (misal 9 jadi 09)
+            j_awal = str(rec.awal_jam).zfill(2) if rec.awal_jam else '00'
+            m_awal = str(rec.awal_menit).zfill(2) if rec.awal_menit else '00'
+            j_akhir = str(rec.akhir_jam).zfill(2) if rec.akhir_jam else '00'
+            m_akhir = str(rec.akhir_menit).zfill(2) if rec.akhir_menit else '00'
+            
+            # Set format: Nama (Start - End)
+            rec.display_name = f"{rec.name} ({j_awal}:{m_awal} - {j_akhir}:{m_akhir})"
