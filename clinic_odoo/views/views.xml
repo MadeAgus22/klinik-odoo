@@ -2,7 +2,7 @@
 <odoo>
   <data>
 
-    <!-- ROOT APP MENU + ICON -->
+    <!-- ROOT APP MENU + ICON   -->
     <menuitem id="menu_dashboard_clinic"
               name="Clinic"
               web_icon="clinic_odoo,static/description/icon_clinic.png"/>
