@@ -7,6 +7,7 @@ access_mst_kelas_tarif_mgr,mst.kelas.tarif.manager,model_mst_kelas_tarif,group_c
 access_mst_unit_pel_dr_mgr,mst.unit.pelayanan.dokter.manager,model_mst_unit_pelayanan_dokter,group_clinic_manager,1,1,1,1
 access_clinic_map_prod_mgr,clinic.mapping.produk.manager,model_clinic_mapping_produk,group_clinic_manager,1,1,1,1
 access_clinic_map_obat_mgr,clinic.mapping.obat.manager,model_clinic_mapping_obat,group_clinic_manager,1,1,1,1
+access_mst_sesi_pelayanan_mgr,mst.sesi.pelayanan.manager,model_mst_sesi_pelayanan,group_clinic_manager,1,1,1,1
 
 access_mst_service_types_usr,mst.service.types.user,model_mst_service_types,group_clinic_user,1,0,0,0
 access_mst_poli_usr,mst.poli.user,model_mst_poli,group_clinic_user,1,0,0,0
