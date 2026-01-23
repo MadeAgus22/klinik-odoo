@@ -39,6 +39,7 @@ Sistem klinik odoo dalam pengembangan akan terus berkembang mengikuti perkembang
         'views/pfn_kunjungan_views.xml',
         'views/emr_views.xml',
         'views/mst_sesi_pelayanan_views.xml',
+        'views/set_doctors_schedule_views.xml',
 
 
     ],

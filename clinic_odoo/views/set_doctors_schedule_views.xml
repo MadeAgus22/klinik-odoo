@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+    <record id="view_set_doctors_schedule_calendar" model="ir.ui.view">
+      <field name="name">set.doctors.schedule.calendar</field>
+      <field name="model">set.doctors.schedule</field>
+      <field name="arch" type="xml">
+        <calendar string="Jadwal Dokter" 
+                  date_start="start_datetime" 
+                  date_stop="end_datetime"
+                  color="session_id"
+                  mode="month"
+                  event_open_popup="true"
+                  quick_create="false">
+          <field name="doctor_id"/>
+          <field name="session_id"/>
+          <field name="quota"/>
+        </calendar>
+      </field>
+    </record>
+
+    <record id="view_set_doctors_schedule_form" model="ir.ui.view">
+      <field name="name">set.doctors.schedule.form</field>
+      <field name="model">set.doctors.schedule</field>
+      <field name="arch" type="xml">
+        <form string="Atur Jadwal">
+          <sheet>
+            <group>
+                <group string="Dokter &amp; Sesi">
+                    <field name="doctor_id" readonly="1" force_save="1"/>
+                    <field name="session_id" widget="selection"/>
+                </group>
+                <group string="Waktu &amp; Quota">
+                    <label for="start_date_req" string="Rentang Tanggal"/>
+                    <div class="o_row">
+                        <field name="start_date_req" widget="daterange" options="{'related_end_date': 'end_date_req'}"/>
+                        <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
+                        <field name="end_date_req" widget="daterange" options="{'related_start_date': 'start_date_req'}"/>
+                    </div>
+                    <field name="quota"/>
+                    <field name="average_duration" widget="float_time"/>
+                    <field name="schedule_date" invisible="1"/>
+                </group>
+            </group>
+            <p class="text-muted">
+                * Jika Tanggal Akhir berbeda dengan Tanggal Mulai, sistem akan membuat jadwal untuk setiap hari dalam rentang tersebut dengan jam sesi yang sama.
+            </p>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_open_schedule_calendar" model="ir.actions.act_window">
+        <field name="name">Kalender Dokter</field>
+        <field name="res_model">set.doctors.schedule</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="context">{'default_doctor_id': active_id, 'search_default_doctor_id': active_id}</field>
+        <field name="domain">[('doctor_id', '=', active_id)]</field>
+    </record>
+
+    <record id="view_doctor_schedule_selection_list" model="ir.ui.view">
+        <field name="name">mst.unit.pelayanan.dokter.schedule.list</field>
+        <field name="model">mst.unit.pelayanan.dokter</field>
+        <field name="arch" type="xml">
+            <list string="Pilih Dokter untuk Jadwal" 
+                  create="false" edit="false" delete="false">
+                
+                <field name="employee_id" string="Nama Dokter" class="fw-bold"/>
+                <field name="divisi_id" string="Divisi"/>
+                <field name="poli_id" string="Poli" optional="show"/>
+                <field name="service_type_id" string="Layanan" optional="show"/>
+
+                <button name="action_open_schedule" 
+                        type="object" 
+                        string="Buka Jadwal" 
+                        class="oe_highlight"/> 
+            </list>
+        </field>
+    </record>
+
+    <record id="view_doctor_schedule_selection_search" model="ir.ui.view">
+        <field name="name">mst.unit.pelayanan.dokter.schedule.search</field>
+        <field name="model">mst.unit.pelayanan.dokter</field>
+        <field name="arch" type="xml">
+            <search string="Cari Dokter">
+                <field name="employee_id"/>
+                <field name="divisi_id"/>
+                <field name="poli_id"/>
+                <field name="service_type_id"/>
+                
+                <group expand="1" string="Group By">
+                    <filter string="Divisi" name="grp_divisi" context="{'group_by':'divisi_id'}"/>
+                    </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_setting_jadwal_dokter" model="ir.actions.act_window">
+        <field name="name">Setting Jadwal Dokter</field>
+        <field name="res_model">mst.unit.pelayanan.dokter</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_doctor_schedule_selection_list"/>
+        <field name="search_view_id" ref="view_doctor_schedule_selection_search"/>
+        
+        <field name="domain">[('divisi_id', '!=', False)]</field>
+
+        <field name="context">{'search_default_grp_divisi': 1}</field>
+
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Pilih Dokter (per Divisi) untuk mengatur jadwal.
+          </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_configuration_clinic"
+              name="Configuration"
+              parent="clinic_odoo.menu_dashboard_clinic"
+              sequence="99"/>
+
+    <menuitem id="menu_setting_jadwal_dokter"
+              name="Setting Jadwal Dokter"
+              parent="menu_configuration_clinic"
+              action="action_setting_jadwal_dokter"
+              sequence="10"/>
+
+  </data>
+</odoo>
