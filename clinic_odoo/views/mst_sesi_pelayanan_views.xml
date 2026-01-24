@@ -10,6 +10,7 @@
                     <field name="name"/>
                     <field name="jam_awal_display" string="Mulai"/>
                     <field name="jam_akhir_display" string="Selesai"/>
+                    <field name="waktu_kerja" string="Durasi Kerja"/>
                     <field name="catatan"/>
                 </list>
             </field>
@@ -32,18 +33,20 @@
 
                         <group string="Jadwal Waktu">
                             <label for="awal_jam" string="Jam Mulai"/>
-                            <div class="o_row">
-                                <field name="awal_jam" style="width: 70px !important;"/>
-                                <span class="o_form_label">:</span>
-                                <field name="awal_menit" style="width: 70px !important;"/>
+                            <div class="o_row" style="display: flex; align-items: center;">
+                                <field name="awal_jam" style="width: 55px !important; flex: none;"/>
+                                <span style="margin: 0 2px; font-weight: bold;">:</span>
+                                <field name="awal_menit" style="width: 55px !important; flex: none;"/>
                             </div>
 
                             <label for="akhir_jam" string="Jam Selesai"/>
-                            <div class="o_row">
-                                <field name="akhir_jam" style="width: 70px !important;"/>
-                                <span class="o_form_label">:</span>
-                                <field name="akhir_menit" style="width: 70px !important;"/>
+                            <div class="o_row" style="display: flex; align-items: center;">
+                                <field name="akhir_jam" style="width: 55px !important; flex: none;"/>
+                                <span style="margin: 0 2px; font-weight: bold;">:</span>
+                                <field name="akhir_menit" style="width: 55px !important; flex: none;"/>
                             </div>
+                            
+                            <field name="waktu_kerja" readonly="1" string="Total Durasi" force_save="1"/>
                         </group>
                     </sheet>
                 </form>
