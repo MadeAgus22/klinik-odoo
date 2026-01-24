@@ -289,19 +289,29 @@ class MstSesiPelayanan(models.Model):
     jam_awal_display = fields.Char(string='Waktu Mulai', compute='_compute_waktu_display')
     jam_akhir_display = fields.Char(string='Waktu Selesai', compute='_compute_waktu_display')
 
+    waktu_kerja = fields.Char(string='Durasi Kerja', compute='_compute_waktu_display')
+
     @api.depends('awal_jam', 'awal_menit', 'akhir_jam', 'akhir_menit')
     def _compute_waktu_display(self):
         for rec in self:
+            # 1. Set Display Waktu Mulai & Selesai
             rec.jam_awal_display = f"{rec.awal_jam}:{rec.awal_menit}" if rec.awal_jam and rec.awal_menit else ""
             rec.jam_akhir_display = f"{rec.akhir_jam}:{rec.akhir_menit}" if rec.akhir_jam and rec.akhir_menit else ""
-    
-    def _compute_display_name(self):
-        for rec in self:
-            # Format jam agar selalu 2 digit (misal 9 jadi 09)
-            j_awal = str(rec.awal_jam).zfill(2) if rec.awal_jam else '00'
-            m_awal = str(rec.awal_menit).zfill(2) if rec.awal_menit else '00'
-            j_akhir = str(rec.akhir_jam).zfill(2) if rec.akhir_jam else '00'
-            m_akhir = str(rec.akhir_menit).zfill(2) if rec.akhir_menit else '00'
-            
-            # Set format: Nama (Start - End)
-            rec.display_name = f"{rec.name} ({j_awal}:{m_awal} - {j_akhir}:{m_akhir})"
+
+            # 2. Hitung Durasi Kerja
+            if rec.awal_jam and rec.akhir_jam:
+                # Konversi ke total menit untuk perhitungan
+                start_total = (int(rec.awal_jam) * 60) + int(rec.awal_menit)
+                end_total = (int(rec.akhir_jam) * 60) + int(rec.akhir_menit)
+
+                # Logika jika waktu selesai melewati tengah malam (misal 22:00 - 02:00)
+                if end_total <= start_total:
+                    diff_total = (1440 - start_total) + end_total # 1440 adalah total menit dlm 1 hari
+                else:
+                    diff_total = end_total - start_total
+
+                hours = diff_total // 60
+                minutes = diff_total % 60
+                rec.waktu_kerja = f"{hours} jam {minutes} menit"
+            else:
+                rec.waktu_kerja = "0 jam 0 menit"
